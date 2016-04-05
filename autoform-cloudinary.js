@@ -44,17 +44,40 @@ _.each(templates, function (tmpl) {
   Template[tmpl].onRendered(function () {
     var self = this;
 
-    Meteor.call('afCloudinarySign', function (err, res) {
+    var options = {};
+    if (this.data && this.data.atts && this.data.atts.folder) {
+      _.extend(options, {folder: this.data.atts.folder});
+    }
+    if (this.data && this.data.atts && this.data.atts.tags) {
+      _.extend(options, {tags: this.data.atts.tags});
+    }
+
+    Meteor.call('afCloudinarySign', options, function (err, res) {
       if (err) {
         return console.log(err);
       }
+
+      //console.log('> afCloudinarySign.res', res);
 
       self.$('input[name=file]').cloudinary_fileupload({
         formData: res
       });
     });
 
+    self.$('input[name=file]').on('fileuploadsend', function(e, data) {
+      self.$('button').prop('disabled', true);
+      self.$('button').text('Uploading ..');
+    });
+
+    self.$('input[name=file]').on('fileuploadprogress', function(e, data) {
+      //$('.progress_bar').css('width', Math.round((data.loaded * 100.0) / data.total) + '%');
+      var progressPercent = Math.round((data.loaded * 100.0) / data.total) + '%';
+      self.$('button').text('Uploading '+progressPercent);
+    });
+
     self.$('input[name=file]').on('fileuploaddone', function (e, data) {
+      self.$('button').text('Browse');
+      self.$('button').prop('disabled', false);
       self.url.set(data.result.secure_url);
       Tracker.flush();
     });
