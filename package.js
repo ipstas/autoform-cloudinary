@@ -2,7 +2,7 @@ Package.describe({
   name: 'cosio55:autoform-cloudinary',
   git: 'https://github.com/cosio55/autoform-cloudinary.git',
   summary: 'Use Cloudinary with autoform/simpleschema to upload an image, and save the url on the collection.',
-  version: '0.0.2'
+  version: '0.0.3'
 });
 
 Package.onUse(function (api) {
