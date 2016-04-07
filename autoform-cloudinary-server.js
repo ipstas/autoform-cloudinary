@@ -10,6 +10,8 @@ Meteor.methods({
 
     params = params || {};
     params.timestamp = (new Date).getTime();
+    params.folder = folderPrefix() +
+        (params.folder ? '/'+params.folder :'');
 
     return cloudinary.utils.sign_request(params, {
       api_key: apiKey(),
@@ -57,4 +59,13 @@ apiSecret = function () {
   }
 
   return Meteor.settings.CLOUDINARY_API_SECRET;
+};
+
+folderPrefix = function() {
+  if (Meteor.settings &&
+      !!Meteor.settings.CLOUDINARY_FOLDER_PREFIX) {
+    return Meteor.settings.CLOUDINARY_FOLDER_PREFIX;
+  }
+
+  return 'temp';
 };
