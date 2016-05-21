@@ -2,7 +2,13 @@
   <div class="afCloudinary">
     {{#if url}}
       <div class="afCloudinary-thumbnail">
-        <a href="{{url}}" target="_blank"><img src="{{url}}"></a>
+          <a href="{{url}}" target="_blank">
+              {{#unless file}}
+                  <img src="{{url}}">
+              {{else}}
+                  <p>{{filename}}</p>
+              {{/unless}}
+          </a>
       </div>
       <a href="#" class="js-remove">Remove</a>
     {{else}}
@@ -29,7 +35,13 @@
   <div class="afCloudinary">
     {{#if url}}
       <div class="afCloudinary-thumbnail">
-        <a href="{{url}}" target="_blank"><img src="{{url}}"></a>
+        <a href="{{url}}" target="_blank">
+            {{#unless file}}
+                <img src="{{url}}">
+            {{else}}
+                <p>{{filename}}</p>
+            {{/unless}}
+        </a>
       </div>
       <a href="#" class="js-remove"><span class="glyphicon glyphicon-remove"></span> Remove</a>
     {{else}}

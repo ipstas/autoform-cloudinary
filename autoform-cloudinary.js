@@ -97,6 +97,15 @@ _.each(templates, function (tmpl) {
 
     accept: function () {
       return this.atts.accept || 'image/*';
+    },
+
+    file: function () {
+      return this.atts.resourceType === 'file';
+    },
+    filename: function() {
+      var t = Template.instance();
+      var url = t.url.get();
+      return url.substring(url.lastIndexOf('/')+1)
     }
   });
 
