@@ -52,6 +52,10 @@ _.each(templates, function (tmpl) {
       _.extend(options, {tags: this.data.atts.tags});
     }
 
+    if (this.data && this.data.atts && this.data.atts.resourceType && this.data.atts.resourceType==='file') {
+      _.extend(options, {use_filename: true});
+    }
+
     Meteor.call('afCloudinarySign', options, function (err, res) {
       if (err) {
         return console.log(err);
