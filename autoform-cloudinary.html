@@ -82,8 +82,8 @@
                             <button type="button" class="btn btn-primary autoform-remove-item"><span class="glyphicon glyphicon-minus"></span></button>
                         {{/if}}
                       </div>
-                      <div class="autoform-array-item-body">
-                        {{> afQuickField name=this.name label=false folder=../atts.folder tags=../atts.tags}}
+                      <div class="autoform-array-item-body xx">
+                        {{> afQuickField template="bootstrap3" name=this.name label=false folder=../atts.folder tags=../atts.tags accept=../atts.accept resourceType=../atts.resourceType}}
                       </div>
                   </div>
               </li>
