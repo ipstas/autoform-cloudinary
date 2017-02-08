@@ -4,7 +4,7 @@
       <div class="afCloudinary-thumbnail">
           <a href="{{url}}" target="_blank">
               {{#unless file}}
-                  <img src="{{url}}">
+                  <img class="img-responsive" src="{{url}}">
               {{else}}
                   <p>{{filename}}</p>
               {{/unless}}
@@ -17,6 +17,7 @@
         Browse
       </button>
     {{/if}}
+		{{errorState}}
     <input
       name="file"
       type="file"
@@ -33,17 +34,21 @@
 
 <template name="afCloudinary_bootstrap3">
   <div class="afCloudinary">
+		{{#if atts.advanced}}
+			<input type="text" id="folder" name="folder" placeholder="subfolder" class="cloudinary-atts form-control form-group" value="{{addatts.folder}}">
+			<input type="text" id="tags" name="tags" placeholder="tags" class="cloudinary-atts form-control  form-group" value="{{addatts.tags}}">
+		{{/if}}
     {{#if url}}
-      <div class="afCloudinary-thumbnail">
-        <a href="{{url}}" target="_blank">
-            {{#unless file}}
-                <img src="{{url}}">
-            {{else}}
-                <p>{{filename}}</p>
-            {{/unless}}
-        </a>
+      <div class="afCloudinary-thumbnail  form-group">
+<!--         <a href="{{url}}" target="_blank"> -->
+					{{#unless file}}
+						<img class="img-responsive" src="{{thumbnail}}">
+					{{else}}
+						<p>{{filename}}</p>
+					{{/unless}}
+<!--         </a> -->
       </div>
-      <a href="#" class="js-remove"><span class="glyphicon glyphicon-remove"></span> Remove</a>
+      <a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove"></span> Remove</a>
     {{else}}
       <button
         type="button"
@@ -51,14 +56,17 @@
         Browse
       </button>
     {{/if}}
+		{{errorState}}
     <input
+			debug={{debug}}
+			tags="cloudinary-fileupload"
       name="file"
       type="file"
       class="cloudinary-fileupload form-control"
       data-cloudinary-field="image_id"
       style="display: none"
       accept="{{accept}}"/>
-    <input {{atts}}
+    <input {{addatts}} {{atts}}
       type="hidden"
       name="url"
       value="{{url}}"/>
@@ -84,6 +92,7 @@
                       </div>
                       <div class="autoform-array-item-body xx">
                         {{> afQuickField template="bootstrap3" name=this.name label=false folder=../atts.folder tags=../atts.tags accept=../atts.accept resourceType=../atts.resourceType}}
+												{{debug}}
                       </div>
                   </div>
               </li>
@@ -92,6 +101,7 @@
               <li class="list-group-item">
                   <button type="button" class="btn btn-primary autoform-add-item" data-autoform-field="{{this.atts.name}}" data-autoform-minCount="{{this.atts.minCount}}" data-autoform-maxCount="{{this.atts.maxCount}}"><span class="glyphicon glyphicon-plus"></span></button>
               </li>
+							{{debug}}
           {{/if}}
         </ul>
     </div>
