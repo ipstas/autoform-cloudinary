@@ -33,32 +33,44 @@
 </template>
 
 <template name="afCloudinary_bootstrap3">
-  <div class="afCloudinary">
-		{{#if atts.advanced}}
-			<input type="text" id="folder" name="folder" placeholder="subfolder" class="cloudinary-atts form-control form-group" value="{{addatts.folder}}">
-			<input type="text" id="tags" name="tags" placeholder="tags" class="cloudinary-atts form-control  form-group" value="{{addatts.tags}}">
-		{{/if}}
+  <div class="afCloudinary afCloudinary_bootstrap3">
+		
     {{#if url}}
       <div class="afCloudinary-thumbnail  form-group">
-<!--         <a href="{{url}}" target="_blank"> -->
-					{{#unless file}}
-						<img class="img-responsive" src="{{thumbnail}}">
-					{{else}}
-						<p>{{filename}}</p>
-					{{/unless}}
-<!--         </a> -->
+				<img class="img-responsive" src="{{thumbnail}}">
       </div>
       <a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove"></span> Remove</a>
     {{else}}
-      <button
-        type="button"
-        class="btn btn-default">
-        Browse
-      </button>
+			{{#if atts.advanced}}
+				<div class="row">
+					<div class="col-xs-2 col-sm-2">
+						<input type="text" id="resource_type" name="type" placeholder="input" class="cloudinary-atts form-control" value="{{addatts.accept}}" disabled>
+					</div>
+					<div class="col-xs-2 col-sm-2">
+						<input type="text" id="folder" name="folder" placeholder="subfolder" class="cloudinary-atts form-control" value="{{addatts.folder}}">
+					</div>
+					<div class="col-xs-5 col-sm-5">
+						<input type="text" id="tags" name="tags" placeholder="tags" class="cloudinary-atts form-control" value="{{addatts.tags}}">
+					</div>
+					<div class="col-xs-3 col-sm-3">
+						<button
+							type="button"
+							class="btn btn-default wd100">
+							Browse
+						</button>
+					</div>
+				</div>
+			{{else}}
+				<button
+					type="button"
+					class="btn btn-default">
+					Browse
+				</button>			
+			{{/if}}
+
     {{/if}}
 		{{errorState}}
     <input
-			debug={{debug}}
 			tags="cloudinary-fileupload"
       name="file"
       type="file"
@@ -67,6 +79,62 @@
       style="display: none"
       accept="{{accept}}"/>
     <input {{addatts}} {{atts}}
+			style="display: none"
+      type="hidden"
+      name="url"
+      value="{{url}}"/>
+  </div>
+</template>
+
+<template name="afCloudinary_file">
+  <div class="afCloudinary afCloudinary_file">
+		
+    {{#if url}}
+      <div class="afCloudinary-thumbnail  form-group">
+				<p><i class="fa fa-file" aria-hidden="true"></i> {{filename}}</p>
+      </div>
+      <a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove"></span> Remove</a>
+    {{else}}
+			{{#if atts.advanced}}
+				<div class="row">
+					<div class="col-xs-2 col-sm-2">
+						<input type="text" id="resource_type" name="type" placeholder="input" class="cloudinary-atts form-control" value="{{addatts.accept}}" disabled>
+					</div>
+					<div class="col-xs-2 col-sm-2">
+						<input type="text" id="folder" name="folder" placeholder="subfolder" class="cloudinary-atts form-control" value="{{addatts.folder}}">
+					</div>
+					<div class="col-xs-5 col-sm-5">
+						<input type="text" id="tags" name="tags" placeholder="tags" class="cloudinary-atts form-control" value="{{addatts.tags}}">
+					</div>
+					<div class="col-xs-3 col-sm-3">
+						<button
+							type="button"
+							class="btn btn-default wd100">
+							Browse
+						</button>
+					</div>
+				</div>
+			{{else}}
+				<button
+					type="button"
+					class="btn btn-default">
+					Browse
+				</button>			
+			{{/if}}
+
+    {{/if}}
+		{{errorState}}
+    <input
+			id="afCloudinary_file"
+			tags="cloudinary-fileupload"
+      name="file"
+      type="file"
+      class="cloudinary-fileupload form-control"
+      data-cloudinary-field="image_id"
+      style="display: none"
+      accept="{{accept}}"/>
+    <input {{addatts}} {{atts}}
+			style="display: none"
       type="hidden"
       name="url"
       value="{{url}}"/>

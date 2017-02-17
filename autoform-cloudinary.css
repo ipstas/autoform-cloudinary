@@ -1,3 +1,7 @@
 .afCloudinary-thumbnail img {
   width: 200px;
 }
+
+.afCloudinary .wd100 {
+  width: 100%;
+}

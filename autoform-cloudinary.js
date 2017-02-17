@@ -2,6 +2,16 @@ AutoForm.addInputType('cloudinary', {
   template: 'afCloudinary',
 
   valueOut: function () {
+		console.log('addInputType cloudinary', this, this.val());
+    return this.val();
+  }
+});
+
+AutoForm.addInputType('cloudinary_file', {
+  template: 'afCloudinary_file',
+	upload_preset: Meteor.settings.public.CLOUDINARY_RAW,
+  valueOut: function () {
+		console.log('addInputType cloudinary_file', this, this.val());
     return this.val();
   }
 });
@@ -25,7 +35,7 @@ Meteor.startup(function () {
     });
 });
 
-var templates = ['afCloudinary', 'afCloudinary_bootstrap3'];
+var templates = ['afCloudinary', 'afCloudinary_bootstrap3', 'afCloudinary_file'];
 
 _.each(templates, function (tmpl) {
   Template[tmpl].onCreated(function () {
@@ -36,9 +46,14 @@ _.each(templates, function (tmpl) {
 		self.errorState = new ReactiveVar();
 		
     self.initialValueChecked = false;
+		
+		if (tmpl == 'afCloudinary_file')
+			self.data.atts.upload_preset = Meteor.settings.public.CLOUDINARY_RAW;
+		
     self.checkInitialValue = function () {
       Tracker.nonreactive(function () {
         if (! self.initialValueChecked && ! self.url.get() && self.data.value) {
+					//console.log('set initial', self.data, this.data);
           self.url.set(self.data.value);
           self.initialValueChecked = true;
         }
@@ -48,8 +63,6 @@ _.each(templates, function (tmpl) {
 
   Template[tmpl].onRendered(function () {
     var self = this;
-		
-		
 
     var options = {};
     if (this.data && this.data.atts && this.data.atts.folder) {
@@ -62,15 +75,22 @@ _.each(templates, function (tmpl) {
     if (this.data && this.data.atts && this.data.atts.resourceType && this.data.atts.resourceType==='file') {
       _.extend(options, {use_filename: true});
     }
-		if (Meteor.settings.public.CLOUDINARY_PRESET)
+		
+		if (this.data.atts.upload_preset)
+			options.upload_preset = this.data.atts.upload_preset;
+		else if (Meteor.settings.public.CLOUDINARY_PRESET)
 			options.upload_preset = Meteor.settings.public.CLOUDINARY_PRESET;
 
-		options.use_filename = true;
-		if (Meteor.settings.public.CLOUDINARY_TAGS)
+		//options.use_filename = true;
+		if (this.data.atts.tags)
+			options.tags = this.data.atts.tags + ', ' + Meteor.settings.public.CLOUDINARY_TAGS;
+		else if (Meteor.settings.public.CLOUDINARY_TAGS)
 			options.tags = Meteor.settings.public.CLOUDINARY_TAGS;
-		
-/* 		if (Meteor.settings.public.CLOUDINARY_FOLDER_PREFIX)
-			options.folder = Meteor.settings.public.CLOUDINARY_FOLDER_PREFIX; */
+
+		if (this.data.atts.folder)
+			options.folder = this.data.atts.folder;		
+		// if (Meteor.settings.public.CLOUDINARY_FOLDER_PREFIX)
+			// options.folder = Meteor.settings.public.CLOUDINARY_FOLDER_PREFIX;
 		
 
 		var env = __meteor_runtime_config__.ROOT_URL.match(/www|stg|app|dev/);
@@ -83,24 +103,31 @@ _.each(templates, function (tmpl) {
 		if (!options.unique_filename && Meteor.settings.public.CLOUDINARY_UNIQ)
 			options.unique_filename = Meteor.settings.public.CLOUDINARY_UNIQ;
 
-		var atts= {};
+		var atts = this.data.atts;
 		atts.tags = options.tags;
 		atts.folder = options.folder;
+		//atts.resource_type  = 'auto'	;
 		self.atts.set(atts);		
-		//console.log('afCloudinarySign onRendered data.atts:', this, 'options:', options);
+		
 		
 		Tracker.autorun(function () {	
 			if (self.atts.get() && self.atts.get().tags)
 				options.tags = options.tags + ', ' + self.atts.get().tags;
 			if (self.atts.get() && self.atts.get().folder)
 				options.folder = self.atts.get().folder;
+			//options.upload_preset = 'xlazzRaw';
+			//options.resource_type  = 'auto'	;
+/* 			if (self.data && self.data.atts)
+				options = self.data.atts; */
 			
-
+			if (self.data && self.data.atts)	
+				console.log('afCloudinarySign onRendered data.atts:', this, 'self:', self, 'options:', options, '\n\n\n');
+				
 			Meteor.call('afCloudinarySign', options, function (err, res) {
 				if (err) {
 					return console.log(err);
 				}
-				//console.log('afCloudinarySign res:', res, 'data.atts:', this.data, 'options:', options);
+				console.log('afCloudinarySign res:', res, 'options:', options, '\n\n\n');
 
 				//console.log('> afCloudinarySign.res', res);
 
@@ -175,13 +202,20 @@ _.each(templates, function (tmpl) {
     thumbnail: function () {
       var t = Template.instance();
 			var url;
-			if (!Meteor.settings.public.CLOUDINARY_SCALED)
-				return t.url.get();
 			var upload = 'upload/' + Meteor.settings.public.CLOUDINARY_SCALED;
-			if (t.url.get())
+			if (Meteor.settings.public.CLOUDINARY_SCALED)
 				url = t.url.get().replace('upload', upload );
+			else
+				url = t.url.get().replace('upload', 'upload/c_fit,h_512,fl_progressive' );
+			console.log('thumbnail', url);
       return url;
     },
+
+		filename(){
+			var t = Template.instance();
+			console.log('filename', t.url.get());
+			return decodeURIComponent(t.url.get().split('/').pop());
+		},	
 
     accept: function () {
       return this.atts.accept || 'image/*';
@@ -190,11 +224,11 @@ _.each(templates, function (tmpl) {
     file: function () {
       return this.atts.resourceType === 'file';
     },
-    filename: function() {
+/*     filename: function() {
       var t = Template.instance();
       var url = t.url.get();
       return url.substring(url.lastIndexOf('/')+1)
-    },
+    }, */
     errorState: function () {
       var t = Template.instance();		
 			var error = t.errorState.get();
@@ -209,6 +243,10 @@ _.each(templates, function (tmpl) {
 		addatts(){
 			var t = Template.instance();	
       var atts = t.atts.get();
+			if (!atts || !atts.type)
+				atts.resourceType = 'image';
+			else
+				atts.resourceType = 'file';
 			//console.log('debug addats:', this, atts);
 			return atts;			
 		},

@@ -46,6 +46,11 @@ Images.attachSchema(new SimpleSchema({
 </template>
 ```
 
+Options:
+```html
+{{> afQuickField folder="markers" tags="arcard, markers" name='marker'}}
+{{> afQuickField advanced="yes" resourceType="file" accept="file" folder="models" upload_preset="xlazzRaw" tags="arcard, models" name='model'}}
+```
 5. Run meteor
 
 `meteor --settings settings.json`
