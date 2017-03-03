@@ -1,7 +1,23 @@
 .afCloudinary-thumbnail img {
+	text-align: center;
   width: 200px;
+	max-width: 100%;
 }
 
 .afCloudinary .wd100 {
   width: 100%;
+}
+
+.afCloudinary input {
+  margin: 10px;
+}
+
+.afCloudinary .jumbotron {
+  background: #ddd;
+	font-size: 48px;
+/* 	background-color: inherit; */
+} 
+
+.afCloudinary-thumbnail{
+	text-align: center;
 }

@@ -4,7 +4,7 @@
       <div class="afCloudinary-thumbnail">
           <a href="{{url}}" target="_blank">
               {{#unless file}}
-                  <img class="img-responsive" src="{{url}}">
+                  <img class="img-responsive" alt="{{filename}}" src="{{url}}">
               {{else}}
                   <p>{{filename}}</p>
               {{/unless}}
@@ -33,45 +33,55 @@
 </template>
 
 <template name="afCloudinary_bootstrap3">
-  <div class="afCloudinary afCloudinary_bootstrap3">
+  <div class="afCloudinary afCloudinary_bootstrap3 animated fadeIn ">
 		
     {{#if url}}
-      <div class="afCloudinary-thumbnail  form-group">
-				<img class="img-responsive" src="{{thumbnail}}">
+      <div id="imgurl" class="afCloudinary-thumbnail form-group animated fadeIn text-center">
+				<img class="animated fadeIn" alt="{{filename}}" onLoad="this.src='{{thumbnail}}'" src="/packages/ipstas_autoform-cloudinary/loading.gif" >
       </div>
-      <a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove"></span> Remove</a>
+      <a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Remove</a>
+			<span type="submit" class="pointer submit"><span class="glyphicon glyphicon-ok animated fadeIn ">OK</span></span>
+			<button type="submit" class="btnsub btn btn-block btn-default hidden">OK</button>
     {{else}}
+			<!-- use advanced=true in the form to show it -->
 			{{#if atts.advanced}}
-				<div class="row">
-					<div class="col-xs-2 col-sm-2">
+				<div class="row animated fadeIn ">
+					<div class="col-xs-6 col-sm-2">
 						<input type="text" id="resource_type" name="type" placeholder="input" class="cloudinary-atts form-control" value="{{addatts.accept}}" disabled>
 					</div>
-					<div class="col-xs-2 col-sm-2">
+					<div class="col-xs-6 col-sm-2">
 						<input type="text" id="folder" name="folder" placeholder="subfolder" class="cloudinary-atts form-control" value="{{addatts.folder}}">
 					</div>
-					<div class="col-xs-5 col-sm-5">
+					<div class="col-xs-7 col-sm-5">
 						<input type="text" id="tags" name="tags" placeholder="tags" class="cloudinary-atts form-control" value="{{addatts.tags}}">
 					</div>
-					<div class="col-xs-3 col-sm-3">
-						<button
+					<div class="col-xs-5 col-sm-3">
+<!-- 						<button
 							type="button"
-							class="btn btn-default wd100">
+							class="browse btn btn-default wd100">
 							Browse
-						</button>
+						</button> -->
+						<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default text-center animated fadeIn ">
+							<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
+						</div>						
 					</div>
 				</div>
 			{{else}}
-				<button
+<!-- 				<button
 					type="button"
-					class="btn btn-default">
+					class="browse btn btn-default">
 					Browse
-				</button>			
+				</button>			 -->
+				<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default animated fadeIn ">
+					<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
+				</div>		
 			{{/if}}
 
     {{/if}}
 		{{errorState}}
     <input
 			tags="cloudinary-fileupload"
+			id="cloudinary-filename"
       name="file"
       type="file"
       class="cloudinary-fileupload form-control"
@@ -80,6 +90,7 @@
       accept="{{accept}}"/>
     <input {{addatts}} {{atts}}
 			style="display: none"
+			id="{{filename}}"	
       type="hidden"
       name="url"
       value="{{url}}"/>

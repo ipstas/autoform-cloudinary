@@ -32,4 +32,6 @@ Package.onUse(function (api) {
   api.addFiles([
     'autoform-cloudinary-server.js'
   ], 'server');
+	
+	api.addAssets('loading.gif', 'client')
 });

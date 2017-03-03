@@ -2,7 +2,7 @@ AutoForm.addInputType('cloudinary', {
   template: 'afCloudinary',
 
   valueOut: function () {
-		console.log('addInputType cloudinary', this, this.val());
+		//console.log('addInputType cloudinary', this, this.val());
     return this.val();
   }
 });
@@ -11,7 +11,7 @@ AutoForm.addInputType('cloudinary_file', {
   template: 'afCloudinary_file',
 	upload_preset: Meteor.settings.public.CLOUDINARY_RAW,
   valueOut: function () {
-		console.log('addInputType cloudinary_file', this, this.val());
+		//console.log('addInputType cloudinary_file', this, this.val());
     return this.val();
   }
 });
@@ -31,7 +31,7 @@ Meteor.startup(function () {
 					upload_preset: Meteor.settings.public.CLOUDINARY_PRESET
         });
       }
-			console.log('cloudinary pkg publicCredentials', err, res);
+			//console.log('cloudinary pkg publicCredentials', err, res);
     });
 });
 
@@ -42,6 +42,7 @@ _.each(templates, function (tmpl) {
     var self = this;
 
     self.url = new ReactiveVar();
+		self.res = new ReactiveVar();
 		self.atts = new ReactiveVar({});
 		self.errorState = new ReactiveVar();
 		
@@ -98,7 +99,10 @@ _.each(templates, function (tmpl) {
 		if (!env)
 			env = ['dev'];
 		
-		options.tags = options.tags + ', ' + env[0] + ', ' + host;
+		var username; 
+		if (Meteor.user())
+			username = Meteor.user().username;
+		options.tags = options.tags + ', ' + env[0] + ', ' + host + ', ' + Meteor.userId() + ', ' + username;
 		
 		if (!options.unique_filename && Meteor.settings.public.CLOUDINARY_UNIQ)
 			options.unique_filename = Meteor.settings.public.CLOUDINARY_UNIQ;
@@ -120,14 +124,14 @@ _.each(templates, function (tmpl) {
 /* 			if (self.data && self.data.atts)
 				options = self.data.atts; */
 			
-			if (self.data && self.data.atts)	
-				console.log('afCloudinarySign onRendered data.atts:', this, 'self:', self, 'options:', options, '\n\n\n');
+			// if (self.data && self.data.atts)	
+				// console.log('afCloudinarySign onRendered data.atts:', this, 'self:', self, 'options:', options, 'this:', this, '\n\n\n');
 				
 			Meteor.call('afCloudinarySign', options, function (err, res) {
 				if (err) {
 					return console.log(err);
 				}
-				console.log('afCloudinarySign res:', res, 'options:', options, '\n\n\n');
+				//console.log('afCloudinarySign res:', res, 'options:', options, '\n\n\n');
 
 				//console.log('> afCloudinarySign.res', res);
 
@@ -138,29 +142,33 @@ _.each(templates, function (tmpl) {
 		});
 
     self.$('input[name=file]').on('fileuploadsend', function(e, data) {
-      self.$('button').prop('disabled', true);
-      self.$('button').text('Uploading ..');
+      self.$('.browse').prop('disabled', true);
+      self.$('.browse').text('0%');
     });
 
     self.$('input[name=file]').on('fileuploadprogress', function(e, data) {
       //$('.progress_bar').css('width', Math.round((data.loaded * 100.0) / data.total) + '%');
       var progressPercent = Math.round((data.loaded * 100.0) / data.total) + '%';
-      self.$('button').text('Uploading '+progressPercent);
+      self.$('.browse').text(progressPercent);
     });
 
     self.$('input[name=file]').on('fileuploaddone', function (e, data) {
-      self.$('button').text('Browse');
-      self.$('button').prop('disabled', false);
+      self.$('.browse').text('Browse');
+      self.$('.browse').prop('disabled', false);
+			self.res.set(data.result);
+			Session.set('fileupload', data.result);
       self.url.set(data.result.secure_url);
-			console.log('fileuploaddone', e, data);
+			if (Session.get('debug'))
+				console.log('fileuploaddone', e, data);
       Tracker.flush();
 			self.errorState.set();
+			Meteor.call('afCloudinary.tag', {tag: data.result.original_filename, public_id: data.result.public_id});
     });
 		
     self.$('input[name=file]').on('fileuploadfail', function (e, data) {
 			console.log('fileuploadfail', e, data);
-      self.$('button').text('Upload Failed');
-      self.$('button').prop('disabled', false);
+      self.$('.browse').text('Upload Failed');
+      self.$('.browse').prop('disabled', false);
 			self.errorState.set(data._response.jqXHR.responseJSON.error.message);
 			Bert.alert({
 				title: 'Upload failed',
@@ -207,14 +215,15 @@ _.each(templates, function (tmpl) {
 				url = t.url.get().replace('upload', upload );
 			else
 				url = t.url.get().replace('upload', 'upload/c_fit,h_512,fl_progressive' );
-			console.log('thumbnail', url);
+			//console.log('thumbnail', url);
       return url;
     },
 
 		filename(){
 			var t = Template.instance();
-			console.log('filename', t.url.get());
-			return decodeURIComponent(t.url.get().split('/').pop());
+			//console.log('filename', t.url.get());
+			if (t.url.get())
+				return decodeURIComponent(t.url.get().split('/').pop());
 		},	
 
     accept: function () {
@@ -242,12 +251,20 @@ _.each(templates, function (tmpl) {
 		}, */
 		addatts(){
 			var t = Template.instance();	
-      var atts = t.atts.get();
+			var atts = t.atts.get();
 			if (!atts || !atts.type)
 				atts.resourceType = 'image';
 			else
 				atts.resourceType = 'file';
-			//console.log('debug addats:', this, atts);
+			if (Session.get('debug'))
+				console.log('debug addats:', this, atts);
+			var filename;
+			if (t.res.get()) {
+				
+				filename = t.res.get().original_filename;
+				atts.tags = atts.tags + ', ' + filename;
+				console.log('atts', atts, atts.tags);
+      }			
 			return atts;			
 		},
 		debug(){
@@ -257,12 +274,35 @@ _.each(templates, function (tmpl) {
   });
 
   Template[tmpl].events({
-    'click button': function (e, t) {
+		'change #cloudinary-filename' (e,t) {
+			console.log('changed file', e, this);
+		},
+		'input' (e,t) {
+			console.log('changed file2', e, this);
+		},
+		'change' (e,t) {
+			console.log('changed file3', e, this);
+		},
+    'click .browse': function (e, t) {
+			console.log('click browse', e, this);
       t.$('input[name=file]').click();
     },
-
+    'click .submit': function (e, t) {
+			e.preventDefault();
+			e.stopPropagation();
+			console.log('submit class', t.res.get(), this, e, e.target, t, $(this).closest('form'), $(this).closest('button'));		
+			//document.forms['insertImagesForm'].submit();
+      $('.btnsub').click();
+			
+    },
+    'click button': function (e, t) {
+			//e.preventDefault();
+			//e.stopPropagation();
+			//console.log('submit button', e,  e.target, t, $(this).closest('form'), this);
+    },
     'click .js-remove': function (e, t) {
       e.preventDefault();
+			e.stopPropagation();
       t.url.set(null);
 			//console.log('remove pic', e.target.id, e, e.target, $(e.currentTarget));
 			var params = {};

@@ -50,6 +50,39 @@ Meteor.methods({
 			return list;
 		}
 	},	
+	'afCloudinary.tag'(params){
+		var result;
+		
+    check(params, Match.Optional(Object));
+	
+    params = params || {};
+    params.timestamp = (new Date).getTime();
+    params.folder = folderPrefix() +
+        (params.folder ? '/'+params.folder :'');
+		
+//		cloudinary.config;
+//		var cloudinary = require('cloudinary');
+
+		var config = cloudinary.config({
+			cloud_name: Meteor.settings.public.CLOUDINARY_CLOUD_NAME,
+      api_key: Meteor.settings.public.CLOUDINARY_API_KEY,
+      api_secret: Meteor.settings.CLOUDINARY_API_SECRET,
+		});
+		//console.log('cloud.fetch 0', config, params);
+		
+		var uploaded;
+
+		try {
+			cloudinary.uploader.add_tag(params.tag, params.public_id, function(res) { 
+				console.log('cloud.fetch tagged', res); 	
+			});			
+		} catch (e) {
+			console.warn('catch in cloud.fetch:', params.tag, params.public_id, e)
+			throw new Meteor.Error(500, 'exception in cloud.tag', e);
+		} finally {
+			return uploaded;
+		}
+	},
 });
 
 apiHost = function() {
