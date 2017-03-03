@@ -21,3 +21,10 @@
 .afCloudinary-thumbnail{
 	text-align: center;
 }
+
+.afCloudinary-multi{
+	position: relative;
+	float: left;
+	padding: 5px;	
+
+}

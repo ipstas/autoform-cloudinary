@@ -34,53 +34,67 @@
 
 <template name="afCloudinary_bootstrap3">
   <div class="afCloudinary afCloudinary_bootstrap3 animated fadeIn ">
-		
-    {{#if url}}
-      <div id="imgurl" class="afCloudinary-thumbnail form-group animated fadeIn text-center">
-				<img class="animated fadeIn" alt="{{filename}}" onLoad="this.src='{{thumbnail}}'" src="/packages/ipstas_autoform-cloudinary/loading.gif" >
-      </div>
-      <a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Remove</a>
-			<span type="submit" class="pointer submit"><span class="glyphicon glyphicon-ok animated fadeIn ">OK</span></span>
-			<button type="submit" class="btnsub btn btn-block btn-default hidden">OK</button>
-    {{else}}
-			<!-- use advanced=true in the form to show it -->
-			{{#if atts.advanced}}
-				<div class="row animated fadeIn ">
-					<div class="col-xs-6 col-sm-2">
-						<input type="text" id="resource_type" name="type" placeholder="input" class="cloudinary-atts form-control" value="{{addatts.accept}}" disabled>
+		{{#if iffiles}}
+			{{#each files}}				
+				<div class="afCloudinary-multi">
+				{{#if url}}
+					<div id="imgurl" class="afCloudinary-thumbnail form-group animated fadeIn text-center">
+						<img class="animated fadeIn" alt="{{filename}}" onLoad="this.src='{{thumbnail}}'" src="/packages/ipstas_autoform-cloudinary/loading.gif" >
 					</div>
-					<div class="col-xs-6 col-sm-2">
-						<input type="text" id="folder" name="folder" placeholder="subfolder" class="cloudinary-atts form-control" value="{{addatts.folder}}">
-					</div>
-					<div class="col-xs-7 col-sm-5">
-						<input type="text" id="tags" name="tags" placeholder="tags" class="cloudinary-atts form-control" value="{{addatts.tags}}">
-					</div>
-					<div class="col-xs-5 col-sm-3">
-<!-- 						<button
-							type="button"
-							class="browse btn btn-default wd100">
-							Browse
-						</button> -->
-						<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default text-center animated fadeIn ">
+					<div>{{filename}}</div>
+					<input {{addatts}} {{atts}}
+						style="display: none"
+						id="{{filename}}"	
+						type="hidden"
+						name="url"
+						value="{{url}}"/>
+					<input 
+						style="display: none"
+						type="hidden"
+						name="file"
+						data-schema-key="file"
+						value="{{filename}}"/>
+					<a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Remove</a>
+					{{#unless submitted}}
+						<span type="submit" class="pointer submit"><span class="glyphicon glyphicon-ok animated fadeIn ">OK</span></span>
+					{{/unless}}
+					<button type="submit" class="btnsub btn btn-block btn-default hidden">OK</button>
+				{{else}}
+					<!-- use advanced=true in the form to show it -->
+					{{#if atts.advanced}}
+						<div class="row animated fadeIn ">
+							<div class="col-xs-6 col-sm-2">
+								<input type="text" id="resource_type" name="type" placeholder="input" class="cloudinary-atts form-control" value="{{addatts.accept}}" disabled>
+							</div>
+							<div class="col-xs-6 col-sm-2">
+								<input type="text" id="folder" name="folder" placeholder="subfolder" class="cloudinary-atts form-control" value="{{addatts.folder}}">
+							</div>
+							<div class="col-xs-7 col-sm-5">
+								<input type="text" id="tags" name="tags" placeholder="tags" class="cloudinary-atts form-control" value="{{addatts.tags}}">
+							</div>
+							<div class="col-xs-5 col-sm-3">
+								<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default text-center animated fadeIn ">
+									<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
+								</div>						
+							</div>
+						</div>
+					{{else}}
+						<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default animated fadeIn ">
 							<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
-						</div>						
-					</div>
+						</div>		
+					{{/if}}
+				{{/if}}
 				</div>
-			{{else}}
-<!-- 				<button
-					type="button"
-					class="browse btn btn-default">
-					Browse
-				</button>			 -->
-				<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default animated fadeIn ">
-					<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
-				</div>		
-			{{/if}}
-
-    {{/if}}
+			{{/each}}
+		{{else}}
+			<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default animated fadeIn ">
+				<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
+			</div>							
+		{{/if}}
 		{{errorState}}
     <input
 			tags="cloudinary-fileupload"
+			multiple
 			id="cloudinary-filename"
       name="file"
       type="file"
@@ -88,12 +102,6 @@
       data-cloudinary-field="image_id"
       style="display: none"
       accept="{{accept}}"/>
-    <input {{addatts}} {{atts}}
-			style="display: none"
-			id="{{filename}}"	
-      type="hidden"
-      name="url"
-      value="{{url}}"/>
   </div>
 </template>
 
@@ -101,10 +109,12 @@
   <div class="afCloudinary afCloudinary_file">
 		
     {{#if url}}
-      <div class="afCloudinary-thumbnail  form-group">
-				<p><i class="fa fa-file" aria-hidden="true"></i> {{filename}}</p>
-      </div>
-      <a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove"></span> Remove</a>
+			
+				<div class="afCloudinary-thumbnail  form-group">
+					<p><i class="fa fa-file" aria-hidden="true"></i> {{filename}}</p>
+				</div>
+				<a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove"></span> Remove</a>
+
     {{else}}
 			{{#if atts.advanced}}
 				<div class="row">

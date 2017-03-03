@@ -1,8 +1,80 @@
+//import { Mongo } from 'meteor/mongo';
+const Files = new Mongo.Collection(null);
+
+const hooksObject = {
+/*   before: {
+    // Replace `formType` with the form `type` attribute to which this hook applies
+    insert: function(doc) {
+      // Potentially alter the doc
+      console.log("before on all input/update/method forms!", doc, this);
+    }
+  }, */
+
+  // The same as the callbacks you would normally provide when calling
+  // collection.insert, collection.update, or Meteor.call
+/*   after: {
+    // Replace `formType` with the form `type` attribute to which this hook applies
+    insert: function(error, result) {
+			console.log("after on all input/update/method forms!", error, result, this);
+		}
+  }, */
+
+  // Called when form does not have a `type` attribute
+/*   onSubmit: function(insertDoc, updateDoc, currentDoc) {
+    // You must call this.done()!
+    //this.done(); // submitted successfully, call onSuccess
+    //this.done(new Error('foo')); // failed to submit, call onError with the provided error
+    //this.done(null, "foo"); // submitted successfully, call onSuccess with `result` arg set to "foo"
+  }, */
+
+  onError: function () {
+    console.warn("onError hook called with arguments", 'context:', this);
+  },
+	onSuccess: function (doc) {
+		if (Session.get('debug'))
+			console.log("onSuccess on all input/update/method forms!", this, 'doc:', doc);
+		
+		if (this.updateDoc)
+			if (Session.get('debug'))
+				console.log ('updatedoc', this.updateDoc.$set);			
+	},
+
+/*   // Called every time an insert or typeless form
+  // is revalidated, which can be often if keyup
+  // validation is used.
+  formToDoc: function(doc) {
+    // alter doc
+    // return doc;
+  },
+
+  // Called every time an update or typeless form
+  // is revalidated, which can be often if keyup
+  // validation is used.
+  formToModifier: function(modifier) {
+    // alter modifier
+    // return modifier;
+  },
+
+  // Called whenever `doc` attribute reactively changes, before values
+  // are set in the form fields.
+  docToForm: function(doc, ss) {},
+
+  // Called at the beginning and end of submission, respectively.
+  // This is the place to disable/enable buttons or the form,
+  // show/hide a "Please wait" message, etc. If these hooks are
+  // not defined, then by default the submit button is disabled
+  // during submission.
+  beginSubmit: function() {},
+  endSubmit: function() {} */
+};
+
+AutoForm.addHooks(null, hooksObject);
+
 AutoForm.addInputType('cloudinary', {
   template: 'afCloudinary',
 
   valueOut: function () {
-		//console.log('addInputType cloudinary', this, this.val());
+		console.log('addInputType cloudinary', this, this.val());
     return this.val();
   }
 });
@@ -44,6 +116,7 @@ _.each(templates, function (tmpl) {
     self.url = new ReactiveVar();
 		self.res = new ReactiveVar();
 		self.atts = new ReactiveVar({});
+		self.files = new ReactiveVar({});
 		self.errorState = new ReactiveVar();
 		
     self.initialValueChecked = false;
@@ -62,6 +135,17 @@ _.each(templates, function (tmpl) {
     };
   });
 
+	Template[tmpl].onDestroyed( () => {
+		var files = (Files.find().fetch());
+		console.log('destroying clouds', files);
+		_.each(files.cloud, function(cloud){
+			var params = {};
+			params.cloud = cloud;
+			Meteor.call('afCloudinaryRemove', params);
+			Files.remove({cloud: cloud});	
+		});
+	}); 
+	
   Template[tmpl].onRendered(function () {
     var self = this;
 
@@ -144,32 +228,55 @@ _.each(templates, function (tmpl) {
     self.$('input[name=file]').on('fileuploadsend', function(e, data) {
       self.$('.browse').prop('disabled', true);
       self.$('.browse').text('0%');
+			if (Session.get('debug'))
+				console.log('fileuploadsend', data.files, e, data);
+			var file = data.files[0];
+			Files.insert({filename: file.name, type: file.type, size: file.size});
     });
 
     self.$('input[name=file]').on('fileuploadprogress', function(e, data) {
       //$('.progress_bar').css('width', Math.round((data.loaded * 100.0) / data.total) + '%');
       var progressPercent = Math.round((data.loaded * 100.0) / data.total) + '%';
+			//if (Session.get('debug')) console.log('fileuploadprogress', e, data);
       self.$('.browse').text(progressPercent);
+			var files = self.files.get();
+			if (!files)
+				files = [];
+			
+			//files.push(data.res.original_filename);
+			
     });
 
     self.$('input[name=file]').on('fileuploaddone', function (e, data) {
-      self.$('.browse').text('Browse');
+      //self.$('.browse').text('Browse');
       self.$('.browse').prop('disabled', false);
 			self.res.set(data.result);
 			Session.set('fileupload', data.result);
       self.url.set(data.result.secure_url);
-			if (Session.get('debug'))
-				console.log('fileuploaddone', e, data);
+
       Tracker.flush();
 			self.errorState.set();
+			var file = data.files[0];
+			Files.update({filename: file.name},{$set:{
+				status: data.textStatus, 
+				maxSize: data.maxFileSize, 
+				size: data.loaded, 
+				url:data.result.secure_url, 
+				cloud: data.result.public_id, 
+				cloudinary: data.result
+			}});			
+			if (Session.get('debug'))
+				console.log('fileuploaddone', data.files, Files.findOne({filename: file.name}), '\ndata:', data, '\n\n\n');
 			Meteor.call('afCloudinary.tag', {tag: data.result.original_filename, public_id: data.result.public_id});
     });
 		
     self.$('input[name=file]').on('fileuploadfail', function (e, data) {
-			console.log('fileuploadfail', e, data);
+			console.warn('fileuploadfail', e, data);
       self.$('.browse').text('Upload Failed');
       self.$('.browse').prop('disabled', false);
 			self.errorState.set(data._response.jqXHR.responseJSON.error.message);
+			var file = data.files[0];
+			Files.update({filename: file.name},{error: data._response});
 			Bert.alert({
 				title: 'Upload failed',
 				message: data._response.jqXHR.responseJSON.error.message,
@@ -181,21 +288,25 @@ _.each(templates, function (tmpl) {
     });
 
     self.$(self.firstNode).closest('form').on('reset', function () {
-      self.url.set(null);
+      //self.url.set(null);
     });
   });
 
   Template[tmpl].helpers({
-    url: function () {
+		iffiles(){
+			return Files.find().count();
+		},
+		files(){
+			return Files.find();
+		},
+		
+/*     url: function () {
       var t = Template.instance();
 			var url;
-/* 			var upload = 'upload/' + Meteor.settings.public.CLOUDINARY_SCALED;
-			if (t.url.get())
-				url = t.url.get().replace('upload', upload ); */
 			url = t.url.get();
       t.checkInitialValue();
       return url;
-    },
+    }, */
 		
 		cloudId(){
       var t = Template.instance();
@@ -203,7 +314,7 @@ _.each(templates, function (tmpl) {
 /* 			var upload = 'upload/' + Meteor.settings.public.CLOUDINARY_SCALED;
 			if (t.url.get())
 				url = t.url.get().replace('upload', upload ); */
-			cloudId = t.url.get().split('/').pop().split('.')[0];	
+			var cloudId = this.url.split('/').pop().split('.')[0];	
 			return cloudId;
 		}, 
 		
@@ -212,20 +323,20 @@ _.each(templates, function (tmpl) {
 			var url;
 			var upload = 'upload/' + Meteor.settings.public.CLOUDINARY_SCALED;
 			if (Meteor.settings.public.CLOUDINARY_SCALED)
-				url = t.url.get().replace('upload', upload );
+				url = this.url.replace('upload', upload );
 			else
-				url = t.url.get().replace('upload', 'upload/c_fit,h_512,fl_progressive' );
+				url = this.url.replace('upload', 'upload/c_fit,h_256,fl_progressive' );
 			//console.log('thumbnail', url);
       return url;
     },
 
-		filename(){
+/* 		filename(){
 			var t = Template.instance();
 			//console.log('filename', t.url.get());
 			if (t.url.get())
 				return decodeURIComponent(t.url.get().split('/').pop());
 		},	
-
+ */
     accept: function () {
       return this.atts.accept || 'image/*';
     },
@@ -290,7 +401,9 @@ _.each(templates, function (tmpl) {
     'click .submit': function (e, t) {
 			e.preventDefault();
 			e.stopPropagation();
-			console.log('submit class', t.res.get(), this, e, e.target, t, $(this).closest('form'), $(this).closest('button'));		
+			if (Session.get('debug'))
+				console.log('submit class', this);		
+			//Files.remove({filename: this.filename});
 			//document.forms['insertImagesForm'].submit();
       $('.btnsub').click();
 			
@@ -303,11 +416,14 @@ _.each(templates, function (tmpl) {
     'click .js-remove': function (e, t) {
       e.preventDefault();
 			e.stopPropagation();
-      t.url.set(null);
-			//console.log('remove pic', e.target.id, e, e.target, $(e.currentTarget));
+      t.url.set(null);		
+			if (Session.get('debug'))
+				console.log('remove pic', e.target.id, this, e, e.target, $(e.currentTarget));
 			var params = {};
 			params.cloud = e.target.id
+			Files.remove({filename: file});
 			Meteor.call('afCloudinaryRemove', params);
+			Files.remove({filename: this.filename});
     },
 		
     'change .cloudinary-atts': function (e, t) {
