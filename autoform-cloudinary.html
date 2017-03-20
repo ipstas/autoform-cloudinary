@@ -54,11 +54,18 @@
 						name="file"
 						data-schema-key="file"
 						value="{{filename}}"/>
-					<a href="#" id="{{cloudId}}" class="js-remove"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Remove</a>
+					<a href="#" class="js-remove" id="{{cloudId}}"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Remove</a>
 					{{#unless submitted}}
+						{{#unless dimensions}}
 						<span type="submit" class="pointer submit"><span class="glyphicon glyphicon-ok animated fadeIn ">OK</span></span>
+						{{/unless}}
 					{{/unless}}
-					<button type="submit" class="btnsub btn btn-block btn-default hidden">OK</button>
+					<button type="submit" id="{{cloud}}" class="btnsub btn btn-block btn-default hidden">OK</button>
+					{{#with dimensions}}
+						<div class="red">
+							Wrong size {{width}}:{{height}}. Should be 2:1
+						</div>
+					{{/with}}
 				{{else}}
 					<!-- use advanced=true in the form to show it -->
 					{{#if atts.advanced}}
@@ -79,17 +86,29 @@
 							</div>
 						</div>
 					{{else}}
-						<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default animated fadeIn ">
-							<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
+						<div role="button" class="drophere jumbotron jumbotron-fluid btn-default animated fadeIn ">
+							{{#if progress}}
+								{{progress}}%
+							{{else}}
+								0%
+							{{/if}}
 						</div>		
 					{{/if}}
 				{{/if}}
 				</div>
 			{{/each}}
 		{{else}}
-			<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default animated fadeIn ">
-				<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
-			</div>							
+			{{#if url}}
+				<div id="imgurl" class="afCloudinary-thumbnail form-group animated fadeIn text-center">
+					<img class="animated fadeIn" alt="{{filename}}" onLoad="this.src='{{thumbnail}}'" src="/packages/ipstas_autoform-cloudinary/loading.gif" >
+				</div>
+<!-- 				<a href="#" class="js-remove" id="{{cloudId}}"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Remove</a> -->
+				<a href="#" class="replace uploader browse" id="{{cloudId}}"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Replace</a>
+			{{else}}
+				<div role="button" class="uploader drophere jumbotron jumbotron-fluid browse btn-default animated fadeIn ">
+					<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
+				</div>	
+			{{/if}}
 		{{/if}}
 		{{errorState}}
     <input

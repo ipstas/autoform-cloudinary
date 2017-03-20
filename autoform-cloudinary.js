@@ -32,11 +32,16 @@ const hooksObject = {
   },
 	onSuccess: function (doc) {
 		if (Session.get('debug'))
-			console.log("onSuccess on all input/update/method forms!", this, 'doc:', doc);
-		
-		if (this.updateDoc)
-			if (Session.get('debug'))
-				console.log ('updatedoc', this.updateDoc.$set);			
+			console.log("onSuccess on all input/update/method forms! update:", doc == 'update', doc, url, this.currentDoc, 'this:', this, this.insertDoc, 'files:', Files.find().fetch(), '\n\n' );	
+		var url;
+		if (this.insertDoc && this.insertDoc.file) 
+			Files.remove({filename: this.insertDoc.file});	
+		else if (doc == 'update') {
+			url = _.values(this.updateDoc.$set)[0];
+			Files.remove({url:url});			
+		}		
+		if (Session.get('debug'))
+			console.log("onSuccess on all input/update/method forms! update:", doc == 'update', doc, url, this.currentDoc, 'this:', this, this.insertDoc, 'files:', Files.find().fetch(), '\n\n' );	
 	},
 
 /*   // Called every time an insert or typeless form
@@ -137,7 +142,7 @@ _.each(templates, function (tmpl) {
 
 	Template[tmpl].onDestroyed( () => {
 		var files = (Files.find().fetch());
-		console.log('destroying clouds', files);
+		console.log('destroying clouds in autoform', files);
 		_.each(files.cloud, function(cloud){
 			var params = {};
 			params.cloud = cloud;
@@ -179,14 +184,17 @@ _.each(templates, function (tmpl) {
 		
 
 		var env = __meteor_runtime_config__.ROOT_URL.match(/www|stg|app|dev/);
-		var host = __meteor_runtime_config__.ROOT_URL.split('/')[2]
-		if (!env)
-			env = ['dev'];
+		if (env)
+			env = env[0];
+		else
+			env = 'dev';
+		
+		var host = __meteor_runtime_config__.ROOT_URL.split('/')[2];
 		
 		var username; 
 		if (Meteor.user())
 			username = Meteor.user().username;
-		options.tags = options.tags + ', ' + env[0] + ', ' + host + ', ' + Meteor.userId() + ', ' + username;
+		options.tags = options.tags + ', ' + env + ', ' + host + ', ' + Meteor.userId() + ', ' + username;
 		
 		if (!options.unique_filename && Meteor.settings.public.CLOUDINARY_UNIQ)
 			options.unique_filename = Meteor.settings.public.CLOUDINARY_UNIQ;
@@ -226,10 +234,10 @@ _.each(templates, function (tmpl) {
 		});
 
     self.$('input[name=file]').on('fileuploadsend', function(e, data) {
-      self.$('.browse').prop('disabled', true);
-      self.$('.browse').text('0%');
-			if (Session.get('debug'))
-				console.log('fileuploadsend', data.files, e, data);
+      self.$('.uploader').prop('disabled', true).removeClass("browse");
+      self.$('.uploader').text('0%');
+			// if (Session.get('debug'))
+				// console.log('fileuploadsend', data.files, e, data);
 			var file = data.files[0];
 			Files.insert({filename: file.name, type: file.type, size: file.size});
     });
@@ -237,11 +245,15 @@ _.each(templates, function (tmpl) {
     self.$('input[name=file]').on('fileuploadprogress', function(e, data) {
       //$('.progress_bar').css('width', Math.round((data.loaded * 100.0) / data.total) + '%');
       var progressPercent = Math.round((data.loaded * 100.0) / data.total) + '%';
+			var file = data.files[0];
+			Files.update({filename: file.name},{$set:{
+				progress: Math.round((data.loaded * 100.0) / data.total)
+			}});
 			//if (Session.get('debug')) console.log('fileuploadprogress', e, data);
-      self.$('.browse').text(progressPercent);
-			var files = self.files.get();
-			if (!files)
-				files = [];
+      //self.$('.browse').text(progressPercent);
+			// var files = self.files.get();
+			// if (!files)
+				// files = [];
 			
 			//files.push(data.res.original_filename);
 			
@@ -249,25 +261,33 @@ _.each(templates, function (tmpl) {
 
     self.$('input[name=file]').on('fileuploaddone', function (e, data) {
       //self.$('.browse').text('Browse');
-      self.$('.browse').prop('disabled', false);
+      self.$('.uploader').prop('disabled', false).addClass('browse');
 			self.res.set(data.result);
-			Session.set('fileupload', data.result);
-      self.url.set(data.result.secure_url);
+			//Session.set('fileupload', data.result);
+      //self.url.set(data.result.secure_url);
 
       Tracker.flush();
-			self.errorState.set();
+			//self.errorState.set();
 			var file = data.files[0];
+			var cloud = data.result.public_id.split('/')[1];
 			Files.update({filename: file.name},{$set:{
 				status: data.textStatus, 
 				maxSize: data.maxFileSize, 
 				size: data.loaded, 
 				url:data.result.secure_url, 
-				cloud: data.result.public_id, 
-				cloudinary: data.result
+				cloud: cloud, 
+				cloudinary: data.result,
+				metadata: data.result.image_metadata
 			}});			
+			Session.set('insertedMetadata', data.result.image_metadata);
 			if (Session.get('debug'))
-				console.log('fileuploaddone', data.files, Files.findOne({filename: file.name}), '\ndata:', data, '\n\n\n');
+				console.log('fileuploaddone', self.atts.get(), data.files, Files.findOne({filename: file.name}), '\ndata:', data, '\n\n\n');
 			Meteor.call('afCloudinary.tag', {tag: data.result.original_filename, public_id: data.result.public_id});
+			Meteor.setTimeout(function(){
+				if (self.atts.get().autosave)
+					$('.submit').click();
+			},100);	
+			
     });
 		
     self.$('input[name=file]').on('fileuploadfail', function (e, data) {
@@ -299,28 +319,32 @@ _.each(templates, function (tmpl) {
 		files(){
 			return Files.find();
 		},
-		
-/*     url: function () {
-      var t = Template.instance();
-			var url;
-			url = t.url.get();
-      t.checkInitialValue();
-      return url;
-    }, */
-		
+		url(){
+			//console.log('if url', this);
+			if (this.value)
+				this.url = this.value;
+			return this.url;
+		},
 		cloudId(){
       var t = Template.instance();
 			var url;
+			//console.log('cloudId', this);
+			if (this.value)
+				this.url = this.value;
 /* 			var upload = 'upload/' + Meteor.settings.public.CLOUDINARY_SCALED;
 			if (t.url.get())
 				url = t.url.get().replace('upload', upload ); */
 			var cloudId = this.url.split('/').pop().split('.')[0];	
 			return cloudId;
-		}, 
-		
+		}, 	
     thumbnail: function () {
       var t = Template.instance();
 			var url;
+			//console.log('thumbnail', this);
+			if (this.value)
+				this.url = this.value;
+			if (!this.url)
+				return console.warn('empty url', this);
 			var upload = 'upload/' + Meteor.settings.public.CLOUDINARY_SCALED;
 			if (Meteor.settings.public.CLOUDINARY_SCALED)
 				url = this.url.replace('upload', upload );
@@ -329,26 +353,12 @@ _.each(templates, function (tmpl) {
 			//console.log('thumbnail', url);
       return url;
     },
-
-/* 		filename(){
-			var t = Template.instance();
-			//console.log('filename', t.url.get());
-			if (t.url.get())
-				return decodeURIComponent(t.url.get().split('/').pop());
-		},	
- */
     accept: function () {
       return this.atts.accept || 'image/*';
     },
-
     file: function () {
       return this.atts.resourceType === 'file';
     },
-/*     filename: function() {
-      var t = Template.instance();
-      var url = t.url.get();
-      return url.substring(url.lastIndexOf('/')+1)
-    }, */
     errorState: function () {
       var t = Template.instance();		
 			var error = t.errorState.get();
@@ -356,10 +366,6 @@ _.each(templates, function (tmpl) {
 				console.log('fileuploadfail error', error);
 			return error;
 		},
-/* 		atts(){
-			console.log('debug atts:', this);
-			return this.atts;
-		}, */
 		addatts(){
 			var t = Template.instance();	
 			var atts = t.atts.get();
@@ -374,12 +380,20 @@ _.each(templates, function (tmpl) {
 				
 				filename = t.res.get().original_filename;
 				atts.tags = atts.tags + ', ' + filename;
-				console.log('atts', atts, atts.tags);
+				//console.log('atts', atts, atts.tags);
       }			
 			return atts;			
 		},
+		dimensions(){
+/* 			var dimensions = {width: this.cloudinary.width, height: this.cloudinary.height};
+			if (this.cloudinary.width / this.cloudinary.height == 2)
+				return;
+			Bert.alert('You have uploaded file with wrong dimensions. It might not work', 'warning');
+			return dimensions; */
+		},
 		debug(){
-			console.log('debug this:', this);
+			if (Session.get('debug'))
+				console.log('debug this:', this);
 			return 'debug';
 		}
   });
@@ -403,7 +417,7 @@ _.each(templates, function (tmpl) {
 			e.stopPropagation();
 			if (Session.get('debug'))
 				console.log('submit class', this);		
-			//Files.remove({filename: this.filename});
+			
 			//document.forms['insertImagesForm'].submit();
       $('.btnsub').click();
 			
@@ -421,8 +435,7 @@ _.each(templates, function (tmpl) {
 				console.log('remove pic', e.target.id, this, e, e.target, $(e.currentTarget));
 			var params = {};
 			params.cloud = e.target.id
-			Files.remove({filename: file});
-			Meteor.call('afCloudinaryRemove', params);
+			Meteor.call('afCloudinaryRemove', params);	
 			Files.remove({filename: this.filename});
     },
 		

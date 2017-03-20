@@ -5,7 +5,7 @@ if (process.env.CLOUDINARY_URL) {
 }
 
 Meteor.methods({
-  afCloudinarySign: function (params) {
+  afCloudinarySign (params) {
     check(params, Match.Optional(Object));
 
     params = params || {};
@@ -18,7 +18,7 @@ Meteor.methods({
       api_secret: apiSecret()
     });
   },
-  publicCredentials: function() {
+  publicCredentials() {
     if (cloudinaryURL) {
       return {
         cloudName: apiHost(),
@@ -26,7 +26,7 @@ Meteor.methods({
       }
     }
   },
-	'afCloudinaryRemove'(params){
+	afCloudinaryRemove(params){
 		console.log('cloud.remove 0', params);
 		//return;
 		var list;
