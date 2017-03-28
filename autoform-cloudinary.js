@@ -1,14 +1,16 @@
 //import { Mongo } from 'meteor/mongo';
 const Files = new Mongo.Collection(null);
+window._localFiles = Files;
 
 const hooksObject = {
-/*   before: {
+  before: {
     // Replace `formType` with the form `type` attribute to which this hook applies
     insert: function(doc) {
       // Potentially alter the doc
       console.log("before on all input/update/method forms!", doc, this);
+			return doc;
     }
-  }, */
+  },
 
   // The same as the callbacks you would normally provide when calling
   // collection.insert, collection.update, or Meteor.call
@@ -31,17 +33,16 @@ const hooksObject = {
     console.warn("onError hook called with arguments", 'context:', this);
   },
 	onSuccess: function (doc) {
+		Files.remove(Session.get('cloudinarySubmittedId'));	
 		if (Session.get('debug'))
-			console.log("onSuccess on all input/update/method forms! update:", doc == 'update', doc, url, this.currentDoc, 'this:', this, this.insertDoc, 'files:', Files.find().fetch(), '\n\n' );	
-		var url;
-		if (this.insertDoc && this.insertDoc.file) 
-			Files.remove({filename: this.insertDoc.file});	
-		else if (doc == 'update') {
-			url = _.values(this.updateDoc.$set)[0];
-			Files.remove({url:url});			
-		}		
-		if (Session.get('debug'))
-			console.log("onSuccess on all input/update/method forms! update:", doc == 'update', doc, url, this.currentDoc, 'this:', this, this.insertDoc, 'files:', Files.find().fetch(), '\n\n' );	
+			console.log("autoform-cloudinary: onSuccess. update:", 
+				'doc:', doc, 
+				'submittedId:', Session.get('cloudinarySubmittedId'),
+				'currentDoc:', this.currentDoc, 
+				'insertDoc:', this.insertDoc, 
+				'\nfiles:', Files.find().fetch(), 
+				'\nthis:', this, '\n\n' 
+			);	
 	},
 
 /*   // Called every time an insert or typeless form
@@ -123,6 +124,7 @@ _.each(templates, function (tmpl) {
 		self.atts = new ReactiveVar({});
 		self.files = new ReactiveVar({});
 		self.errorState = new ReactiveVar();
+		Session.set('cloudinarySubmittedId');
 		
     self.initialValueChecked = false;
 		
@@ -350,7 +352,7 @@ _.each(templates, function (tmpl) {
 				url = this.url.replace('upload', upload );
 			else
 				url = this.url.replace('upload', 'upload/c_fit,h_256,fl_progressive' );
-			//console.log('thumbnail', url);
+			console.log('thumbnail', this, url);
       return url;
     },
     accept: function () {
@@ -417,6 +419,7 @@ _.each(templates, function (tmpl) {
 			e.stopPropagation();
 			if (Session.get('debug'))
 				console.log('submit class', this);		
+			Session.set('cloudinarySubmittedId', this._id);
 			
 			//document.forms['insertImagesForm'].submit();
       $('.btnsub').click();

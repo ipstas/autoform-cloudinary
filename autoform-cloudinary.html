@@ -39,7 +39,7 @@
 				<div class="afCloudinary-multi">
 				{{#if url}}
 					<div id="imgurl" class="afCloudinary-thumbnail form-group animated fadeIn text-center">
-						<img class="animated fadeIn" alt="{{filename}}" onLoad="this.src='{{thumbnail}}'" src="/packages/ipstas_autoform-cloudinary/loading.gif" >
+						<img class="animated fadeIn iffiles" alt="{{filename}}" onLoad="this.src='{{thumbnail}}'" src="/packages/ipstas_autoform-cloudinary/loading.gif" >
 					</div>
 					<div>{{filename}}</div>
 					<input {{addatts}} {{atts}}
@@ -57,7 +57,7 @@
 					<a href="#" class="js-remove" id="{{cloudId}}"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Remove</a>
 					{{#unless submitted}}
 						{{#unless dimensions}}
-						<span type="submit" class="pointer submit"><span class="glyphicon glyphicon-ok animated fadeIn ">OK</span></span>
+						<span type="submit" class="pointer submit" id="{{_id}}"><span class="glyphicon glyphicon-ok animated fadeIn ">OK</span></span>
 						{{/unless}}
 					{{/unless}}
 					<button type="submit" id="{{cloud}}" class="btnsub btn btn-block btn-default hidden">OK</button>
@@ -100,7 +100,7 @@
 		{{else}}
 			{{#if url}}
 				<div id="imgurl" class="afCloudinary-thumbnail form-group animated fadeIn text-center">
-					<img class="animated fadeIn" alt="{{filename}}" onLoad="this.src='{{thumbnail}}'" src="/packages/ipstas_autoform-cloudinary/loading.gif" >
+					<img class="animated fadeIn ifNOfiles" alt="{{filename}}" onLoad="this.src='{{thumbnail}}'" src="/packages/ipstas_autoform-cloudinary/loading.gif" >
 				</div>
 <!-- 				<a href="#" class="js-remove" id="{{cloudId}}"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Remove</a> -->
 				<a href="#" class="replace uploader browse" id="{{cloudId}}"><span class="glyphicon glyphicon-remove animated fadeIn "></span> Replace</a>
