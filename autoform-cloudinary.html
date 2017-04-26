@@ -80,13 +80,13 @@
 								<input type="text" id="tags" name="tags" placeholder="tags" class="cloudinary-atts form-control" value="{{addatts.tags}}">
 							</div>
 							<div class="col-xs-5 col-sm-3">
-								<div role="button" class="drophere jumbotron jumbotron-fluid browse btn-default text-center animated fadeIn ">
+								<div role="button" class="uploader drophere jumbotron jumbotron-fluid browse btn-default text-center animated fadeIn ">
 									<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
 								</div>						
 							</div>
 						</div>
 					{{else}}
-						<div role="button" class="drophere jumbotron jumbotron-fluid btn-default animated fadeIn ">
+						<div role="button" class="uploader drophere jumbotron jumbotron-fluid btn-default animated fadeIn ">
 							{{#if progress}}
 								{{progress}}%
 							{{else}}
@@ -110,7 +110,7 @@
 				</div>	
 			{{/if}}
 		{{/if}}
-		{{errorState}}
+		<div class="red">{{errorState}}</div>
     <input
 			tags="cloudinary-fileupload"
 			multiple

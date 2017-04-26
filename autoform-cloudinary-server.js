@@ -14,9 +14,15 @@ Meteor.methods({
         (params.folder ? '/'+params.folder :'');
 
     return cloudinary.utils.sign_request(params, {
+			cloud_name: Meteor.settings.public.CLOUDINARY_CLOUD_NAME,
       api_key: apiKey(),
       api_secret: apiSecret()
     });
+  },
+  afCloudinaryChecksize () {
+    //check(params, Object);
+		console.log('afCloudinaryChecksize checking max img size for upload');
+		return Meteor.call('image.checkImgSize');
   },
   publicCredentials() {
     if (cloudinaryURL) {
