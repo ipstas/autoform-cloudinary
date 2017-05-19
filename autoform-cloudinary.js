@@ -8,7 +8,7 @@ const hooksObject = {
     // Replace `formType` with the form `type` attribute to which this hook applies
     insert: function(doc) {
       // Potentially alter the doc
-      console.log("before on all input/update/method forms!", doc, this);
+      if (Session.get('debug')) console.log("before on all input/update/method forms!", doc, this);
 			return doc;
     }
   },
@@ -81,7 +81,7 @@ AutoForm.addInputType('cloudinary', {
   template: 'afCloudinary',
 
   valueOut: function () {
-		console.log('addInputType cloudinary', this, this.val());
+		if (Session.get('debug')) console.log('addInputType cloudinary', this, this.val());
     return this.val();
   }
 });
@@ -136,7 +136,7 @@ _.each(templates, function (tmpl) {
     self.checkInitialValue = function () {
       Tracker.nonreactive(function () {
         if (!self.initialValueChecked && !self.url.get() && self.data.value) {
-					console.log('afCloudinary data set initial', self.data);
+					if (Session.get('debug'))  console.log('afCloudinary data set initial', self.data);
           self.url.set(self.data.value);
           self.initialValueChecked = true;
         }
@@ -146,7 +146,7 @@ _.each(templates, function (tmpl) {
 
 	Template[tmpl].onDestroyed(function () {
 		var files = (Files.find().fetch());
-		console.log('destroying clouds in autoform', files);
+		if (Session.get('debug')) console.log('destroying clouds in autoform', files);
 		_.each(files.cloud, function(cloud){
 			var params = {};
 			params.cloud = cloud;
@@ -157,7 +157,9 @@ _.each(templates, function (tmpl) {
 	
   Template[tmpl].onRendered(function () {
     var self = this;
-		console.log('afCloudinary data', self.data);
+		var error;
+		var t = Template.instance();
+		if (Session.get('debug'))  console.log('afCloudinary data', self.data);
     var options = {};
     if (self.data && self.data.atts && self.data.atts.folder) {
       _.extend(options, {folder: self.data.atts.folder});
@@ -209,7 +211,7 @@ _.each(templates, function (tmpl) {
 		if (!atts.folder)
 			atts.folder = options.folder;
 		//atts.resource_type  = 'auto'	;
-		console.log('self.atts.set', atts, 'data:', self.data, '\n\n');
+		if (Session.get('debug')) console.log('self.atts.set', atts, 'data:', self.data, '\n\n');
 		self.atts.set(atts);		
 		
 		
@@ -241,11 +243,11 @@ _.each(templates, function (tmpl) {
 		});
 
 		Meteor.call('afCloudinaryChecksize', function(err, res){
-			console.log('afCloudinaryChecksize max', res);
+			if (Session.get('debug')) console.log('afCloudinaryChecksize max', res, t.checkSize.get());
 			if (err)
-				self.checkSize.set(5000000);
+				t.checkSize.set(5000000);
 			if (res)
-				self.checkSize.set(res);
+				t.checkSize.set(res);
 		});
 
 		self.$('input[name=file]').cloudinary_fileupload({
@@ -261,11 +263,18 @@ _.each(templates, function (tmpl) {
 		self.$('input[name=file]')
 			.bind('fileuploadadd', function(e, data) {
 				var file = data.files[0];
-				if (Session.get('debug')) console.log('afCloudinarySign add:', file.size, self.checkSize.get(),  data, '\n\n\n');
+				if (Session.get('debug')) console.log('afCloudinarySign add:', file.size, t.checkSize.get(),  data, '\n\n\n');
 				//self.checkSize.set(22200);
 				if (file.size > self.checkSize.get()) {
-					var error = file.name + ' is too big, max size is ' + self.checkSize.get()/1024/1024 + 'MB';
-					Bert.alert(error, 'danger');
+					error = file.name + ' is too big, max size is ' + parseInt(t.checkSize.get()/1024/1024) + 'MB';
+					t.errorState.set(error);
+					Bert.alert({
+						hideDelay: 5000,
+						title: 'Upload failed',
+						message: error,
+						type: 'danger',
+						style: 'growl-top-right',
+					});
 					return console.warn('afCloudinarySign add', error);
 				} else 
 					jqXHR = data.submit();
@@ -301,6 +310,7 @@ _.each(templates, function (tmpl) {
 				//self.$('.browse').text('Browse');
 				self.$('.uploader').prop('disabled', false).addClass('browse');
 				self.res.set(data.result);
+				self.errorState.set();
 				//Session.set('fileupload', data.result);
 				//self.url.set(data.result.secure_url);
 
@@ -321,22 +331,25 @@ _.each(templates, function (tmpl) {
 				if (Session.get('debug')) console.log('afCloudinary fileuploaddone', self.atts.get(), data.files, Files.findOne({filename: file.name}), '\ndata:', data, '\n\n\n');
 				Meteor.call('afCloudinary.tag', {tag: data.result.original_filename, public_id: data.result.public_id});
 				Meteor.setTimeout(function(){
-					console.log('afCloudinary checking self.atts.get()', self.atts.get());
+					if (Session.get('debug')) console.log('afCloudinary checking self.atts.get()', self.atts.get());
 					if (self.atts.get().autosave)
 						$('.submit').click();
 				},100);	
-				Session.set('selectDate', new Date().toLocaleDateString());
+				//Session.set('selectDate', new Date().toLocaleDateString());
 			})	
 			.bind('fileuploadfail', function (e, data) {
 				console.warn('afCloudinary fileuploadfail', e, data);
-				self.$('.uploader').prop('disabled', false).addClass('browse');
+				self.$('.uploader').prop('disabled', false).addClass('browse');			
 				
-				self.errorState.set(data._response.jqXHR.responseJSON.error.message);
 				var file = data.files[0];
+				error = data._response.jqXHR.responseJSON.error.message;
+				self.errorState.set(error);
+
 				Files.remove({filename: file.name});
 				Bert.alert({
+					hideDelay: 6000,
 					title: 'Upload failed',
-					message: data._response.jqXHR.responseJSON.error.message,
+					message: error,
 					type: 'danger',
 					style: 'growl-top-right',
 					icon: 'fa-music'
@@ -399,9 +412,10 @@ _.each(templates, function (tmpl) {
     },
     errorState: function () {
       var t = Template.instance();		
-			var error = t.errorState.get();
-			if (error)
-				console.log('afCloudinary fileuploadfail error', error);
+			if (!t.errorState.get())
+				return;
+			var error = t.errorState.get() + '<br>Upgrade to the next plan to have it larger';
+			console.log('afCloudinary fileuploadfail error', error);
 			return error;
 		},
 		addatts: function () {
@@ -429,31 +443,29 @@ _.each(templates, function (tmpl) {
 			return dimensions; */
 		},
 		debug: function (){
-			if (Session.get('debug'))
-				console.log('afCloudinary debug this:', this);
+			if (Session.get('debug')) console.log('afCloudinary debug this:', this);
 			return 'debug';
 		}
   });
 
   Template[tmpl].events({
 		'change #cloudinary-filename': function (e, t) {
-			console.log('afCloudinary changed file', e, this);
+			if (Session.get('debug')) console.log('afCloudinary changed file', e, this);
 		},
 		'input' : function (e, t) {
-			console.log('afCloudinary changed file2', e, this);
+			if (Session.get('debug')) console.log('afCloudinary changed file2', e, this);
 		},
 		'change' : function (e, t) {
-			console.log('afCloudinary changed file3', e, this);
+			if (Session.get('debug')) console.log('afCloudinary changed file3', e, this);
 		},
     'click .browse' : function (e, t) {
-			console.log('afCloudinary click browse', e, this);
+			if (Session.get('debug')) console.log('afCloudinary click browse', e, this);
       t.$('input[name=file]').click();
     },
     'click .submit' : function (e, t) {
 			e.preventDefault();
 			e.stopPropagation();
-			if (Session.get('debug'))
-				console.log('afCloudinary submit class', this);		
+			if (Session.get('debug')) console.log('afCloudinary submit class', this);		
 			Session.set('cloudinarySubmittedId', this._id);
 			
 			//document.forms['insertImagesForm'].submit();
@@ -469,8 +481,7 @@ _.each(templates, function (tmpl) {
       e.preventDefault();
 			e.stopPropagation();
       t.url.set(null);		
-			if (Session.get('debug'))
-				console.log('afCloudinary remove pic', e.target.id, this, e, e.target, $(e.currentTarget));
+			if (Session.get('debug')) console.log('afCloudinary remove pic', e.target.id, this, e, e.target, $(e.currentTarget));
 			var params = {};
 			params.cloud = e.target.id
 			Meteor.call('afCloudinaryRemove', params);	
@@ -485,7 +496,7 @@ _.each(templates, function (tmpl) {
 			else if (e.target.id == 'folder')
 				atts.folder = $(e.currentTarget).val();
 			t.atts.set(atts);
-			console.log('changed t.atts.set', atts);
+			if (Session.get('debug')) console.log('changed t.atts.set', atts);
     }
   });
 });

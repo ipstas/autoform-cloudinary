@@ -17,7 +17,7 @@
         Browse
       </button>
     {{/if}}
-		{{errorState}}
+		{{{errorState}}}
     <input
       name="file"
       type="file"
@@ -86,9 +86,14 @@
 							</div>
 						</div>
 					{{else}}
-						<div role="button" class="uploader drophere jumbotron jumbotron-fluid btn-default animated fadeIn ">
+						<div role="button" class="uploader drophere jumbotron jumbotron-fluid btn-default text-center animated fadeIn ">
 							{{#if progress}}
-								{{progress}}%
+								{{#if $eq progress 100}}
+										<i class="fa fa-spinner fa-pulse animated fadeIn"></i>
+										<span class="sr-only">Loading...</span>
+								{{else}}
+									{{progress}}%
+								{{/if}}
 							{{else}}
 								0%
 							{{/if}}
@@ -110,7 +115,7 @@
 				</div>	
 			{{/if}}
 		{{/if}}
-		<div class="red">{{errorState}}</div>
+		<div class="red">{{{errorState}}}</div>
     <input
 			tags="cloudinary-fileupload"
 			multiple
@@ -163,7 +168,7 @@
 			{{/if}}
 
     {{/if}}
-		{{errorState}}
+		{{{errorState}}}
     <input
 			id="afCloudinary_file"
 			tags="cloudinary-fileupload"

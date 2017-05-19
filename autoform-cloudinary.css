@@ -13,8 +13,11 @@
 }
 
 .afCloudinary .jumbotron {
+	text-align: center;
   background: #ddd;
 	font-size: 48px;
+	padding-right: 10px !important;
+	padding-left: 10px !important;
 /* 	background-color: inherit; */
 } 
 
