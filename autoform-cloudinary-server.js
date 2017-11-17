@@ -1,4 +1,4 @@
-var cloudinary = Npm.require('cloudinary');
+import cloudinary from 'cloudinary';
 
 if (process.env.CLOUDINARY_URL) {
   var cloudinaryURL = new URI(process.env.CLOUDINARY_URL);

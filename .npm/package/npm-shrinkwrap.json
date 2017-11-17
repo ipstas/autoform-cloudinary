@@ -1,26 +1,37 @@
 {
+  "lockfileVersion": 1,
   "dependencies": {
     "cloudinary": {
-      "version": "1.5.0",
-      "resolved": "https://registry.npmjs.org/cloudinary/-/cloudinary-1.5.0.tgz",
-      "from": "cloudinary@1.5.0",
+      "version": "1.9.1",
+      "resolved": "https://registry.npmjs.org/cloudinary/-/cloudinary-1.9.1.tgz",
+      "integrity": "sha512-VfeDkEmamZ5R5BWpMs4rPLwaVDjONE2zxLOrqV+lKzLeqn2TTvEAy/CRQxUmcdxFLJ96gl62LUn+IoUMiYiuYw==",
       "dependencies": {
         "lodash": {
           "version": "3.10.1",
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
-          "from": "lodash@>=3.10.0 <3.11.0"
+          "integrity": "sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y="
+        },
+        "q": {
+          "version": "1.4.1",
+          "resolved": "https://registry.npmjs.org/q/-/q-1.4.1.tgz",
+          "integrity": "sha1-VXBbzZPF82c1MMLCy8DCs63cKG4="
         }
       }
+    },
+    "cloudinary-jquery-file-upload": {
+      "version": "2.3.0",
+      "resolved": "https://registry.npmjs.org/cloudinary-jquery-file-upload/-/cloudinary-jquery-file-upload-2.3.0.tgz",
+      "integrity": "sha1-CPUAerfRJ2kw49hjh5OsU0ZK4xk="
     },
     "lodash": {
       "version": "4.17.4",
       "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
-      "from": "lodash@4.17.4"
+      "integrity": "sha1-eCA6TRwyiuHYbcpkYONptX9AVa4="
     },
     "q": {
-      "version": "1.4.1",
-      "resolved": "https://registry.npmjs.org/q/-/q-1.4.1.tgz",
-      "from": "q@1.4.1"
+      "version": "1.5.0",
+      "resolved": "https://registry.npmjs.org/q/-/q-1.5.0.tgz",
+      "integrity": "sha1-3QG6ydBtMObyGa7LglPunr3DCPE="
     }
   }
 }

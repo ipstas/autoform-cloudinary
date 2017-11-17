@@ -2,6 +2,8 @@
 const Files = new Mongo.Collection(null);
 window._localFiles = Files;
 var jqXHR;
+import cloudinary from 'cloudinary-jquery-file-upload';
+//import 'blueimp-file-upload-npm';
 
 const hooksObject = {
   before: {
