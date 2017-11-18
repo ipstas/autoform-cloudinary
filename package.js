@@ -1,34 +1,44 @@
 Package.describe({
-    name: 'cloudspider:autoform-tags-typeahead',
-    version: '0.7.1',
-    summary: 'Provides a autoform tags input with typeahead functionality',
-    git: 'https://github.com/Redroest/meteor-autoform-tags-typeahead',
-    documentation: 'README.md'
+	name: 'ipstas:autoform-cloudinary3',
+	version: '1.0.1',
+	summary: 'Provides a autoform tags input with typeahead functionality',
+	git: 'https://github.com/Redroest/meteor-autoform-tags-typeahead',
+	documentation: 'README.md'
 });
 
 Package.onUse(function (api) {
-    api.versionsFrom('1.1.0.3');
+	api.versionsFrom('1.1.0.3');
 
-    api.use([
-        'mongo',
-        'aldeed:simple-schema@1.3.3',
-        'aldeed:collection2@2.5.0',
-        'aldeed:autoform@5.5.0',
-        'ajduke:bootstrap-tagsinput@0.7.0',
-        'mrt:bootstrap3-typeahead@0.1.1',
-        'templating'
-    ]);
+	Npm.depends({
+		cloudinary: '1.9.1',
+		'blueimp-file-upload': '9.19.1',
+		'cloudinary-jquery-file-upload': '2.3.0',
+	});
+	
+	api.use([
+		'mongo',
+		'templating',
+		'blaze',
+		'underscore',
+		'aldeed:autoform',
+		//'tomi:upload-jquery'
+	]);
 
-    api.addFiles([
-        'common/tag.js',
-    ], ['server', 'client']);
+	api.addFiles([
+		'autoform_cloudinary.html',
+		'autoform_cloudinary.js',
+		'autoform_cloudinary.css',
+		'jQuery-File-Upload/js/vendor/jquery.ui.widget.js',
+		'jQuery-File-Upload/js/jquery.iframe-transport.js',
+		'jQuery-File-Upload/js/jquery.fileupload.js',
+		//'jQuery-File-Upload/js/jquery.fileupload-image.js',
+		'pkg-cloudinary-jquery-file-upload/cloudinary-jquery-file-upload.js'
+	], 'client');	
+	
+	api.addFiles([
+		'autoform_cloudinary_srv.js'
+	], 'server');
 
-    api.addFiles([
-        'tags-typeahead.html',
-        'tags-typeahead.js',
-        'tags-typeahead.css'
-    ], 'client');
-
-    api.export(['TagsUtil', 'CloudspiderTags']);
+	api.export(['AutoformCloudinary']);
 });
 

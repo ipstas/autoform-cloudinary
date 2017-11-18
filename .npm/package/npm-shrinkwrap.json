@@ -1,0 +1,57 @@
+{
+  "lockfileVersion": 1,
+  "dependencies": {
+    "blueimp-canvas-to-blob": {
+      "version": "3.5.0",
+      "resolved": "https://registry.npmjs.org/blueimp-canvas-to-blob/-/blueimp-canvas-to-blob-3.5.0.tgz",
+      "integrity": "sha1-VnmsMvaig1gh8MOtZhcZ/4WpI2s="
+    },
+    "blueimp-file-upload": {
+      "version": "9.19.1",
+      "resolved": "https://registry.npmjs.org/blueimp-file-upload/-/blueimp-file-upload-9.19.1.tgz",
+      "integrity": "sha512-y4jA9LNjfS8vU+vf0ysosxmEQG+7xlSi6l0tWs2HSmIavsnJFp51bzajNzO6H7WFtyciKbBuolgXmQmdT3IUBQ=="
+    },
+    "blueimp-load-image": {
+      "version": "2.12.2",
+      "resolved": "https://registry.npmjs.org/blueimp-load-image/-/blueimp-load-image-2.12.2.tgz",
+      "integrity": "sha1-ahdZiquFjU+/AVQ+BjEUG1EFfIc="
+    },
+    "blueimp-tmpl": {
+      "version": "3.6.0",
+      "resolved": "https://registry.npmjs.org/blueimp-tmpl/-/blueimp-tmpl-3.6.0.tgz",
+      "integrity": "sha1-pJEJddBC4rwDunfw5i0E8VSKUkw="
+    },
+    "cloudinary": {
+      "version": "1.9.1",
+      "resolved": "https://registry.npmjs.org/cloudinary/-/cloudinary-1.9.1.tgz",
+      "integrity": "sha512-VfeDkEmamZ5R5BWpMs4rPLwaVDjONE2zxLOrqV+lKzLeqn2TTvEAy/CRQxUmcdxFLJ96gl62LUn+IoUMiYiuYw==",
+      "dependencies": {
+        "lodash": {
+          "version": "3.10.1",
+          "resolved": "https://registry.npmjs.org/lodash/-/lodash-3.10.1.tgz",
+          "integrity": "sha1-W/Rejkm6QYnhfUgnid/RW9FAt7Y="
+        },
+        "q": {
+          "version": "1.4.1",
+          "resolved": "https://registry.npmjs.org/q/-/q-1.4.1.tgz",
+          "integrity": "sha1-VXBbzZPF82c1MMLCy8DCs63cKG4="
+        }
+      }
+    },
+    "cloudinary-jquery-file-upload": {
+      "version": "2.3.0",
+      "resolved": "https://registry.npmjs.org/cloudinary-jquery-file-upload/-/cloudinary-jquery-file-upload-2.3.0.tgz",
+      "integrity": "sha1-CPUAerfRJ2kw49hjh5OsU0ZK4xk="
+    },
+    "lodash": {
+      "version": "4.17.4",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
+      "integrity": "sha1-eCA6TRwyiuHYbcpkYONptX9AVa4="
+    },
+    "q": {
+      "version": "1.5.0",
+      "resolved": "https://registry.npmjs.org/q/-/q-1.5.0.tgz",
+      "integrity": "sha1-3QG6ydBtMObyGa7LglPunr3DCPE="
+    }
+  }
+}

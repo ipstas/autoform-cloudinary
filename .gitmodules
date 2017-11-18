@@ -1,0 +1,9 @@
+[submodule "cloudinary_npm"]
+	path = cloudinary_npm
+	url = https://github.com/cloudinary/cloudinary_npm.git
+[submodule "pkg-cloudinary-jquery-file-upload"]
+	path = pkg-cloudinary-jquery-file-upload
+	url = https://github.com/cloudinary/pkg-cloudinary-jquery-file-upload.git
+[submodule "jQuery-File-Upload"]
+	path = jQuery-File-Upload
+	url = https://github.com/blueimp/jQuery-File-Upload.git
