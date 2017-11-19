@@ -1,10 +1,12 @@
 //const cloudinary 'cloudinary';
 const cloudinary = Npm.require('cloudinary');
 
+if (!Meteor.settings.private.cloudinary || !Meteor.settings.public.cloudinary|| !Meteor.settings.public.cloudinary.config) return console.warn('No cloudinary config is found');	
+
 //return;
 var cloudConf = {
-	cloud_name: Meteor.settings.public.cloudinary.cloud_name,
-	api_key: Meteor.settings.public.cloudinary.api_key,
+	cloud_name: Meteor.settings.public.cloudinary.config.cloud_name,
+	api_key: Meteor.settings.public.cloudinary.config.api_key,
 	api_secret: Meteor.settings.private.cloudinary.api_secret
 };
 
