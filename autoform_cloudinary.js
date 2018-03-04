@@ -6,11 +6,19 @@ AutoForm.debug();
 
 const _Files = new Mongo.Collection(null);
 window._localFiles = _Files;
-var jqXHR;
 
-// Using the config function
-//const cloudinary = Npm.require('cloudinary-jquery-file-upload');
-
+let metaData;
+function getMeta(blob){
+	loadImage.parseMetaData(
+		blob,
+		function (data) {
+			if (!data.exif) return;
+			if (Session.get('debug')) console.log('cloudinary getMeta', data.exif.getAll(), data.imageHead);
+			metaData = data.exif.getAll();
+			Session.set('insertedMetadata', metaData);
+		},
+	);
+}
 
 AutoForm.addInputType("cloudinary", {
 	template: "afCloudinary",
@@ -29,155 +37,85 @@ AutoForm.addInputType("cloudinary", {
 //return;
 
 Template.afCloudinary.onCreated(function () {
+	var t = Template.instance();
 	//Session.set('debug', true);
 	var self = this;
 
-	self.url = new ReactiveVar();
-	self.res = new ReactiveVar();
-	self.atts = new ReactiveVar({});
-	self.files = new ReactiveVar({});
-	self.errorState = new ReactiveVar();
-	self.checkSize = new ReactiveVar();
-	self.removeCloud = new ReactiveVar();
+	t.url = new ReactiveVar();
+	t.res = new ReactiveVar();
+	t.atts = new ReactiveVar({});
+	t.files = new ReactiveVar({});
+	t.errorState = new ReactiveVar();
+	t.checkSize = new ReactiveVar();
+	t.removeCloud = new ReactiveVar();
 	
 	Session.set('cloudinarySubmittedId');
 	
 	self.initialValueChecked = false;
 	
-	self.checkInitialValue = function () {
-		Tracker.nonreactive(function () {
-			if (!self.initialValueChecked && !self.url.get() && self.data.value) {
-				if (Session.get('debug'))  
-					console.log('afCloudinary data set initial', self.data);
-				self.url.set(self.data.value);
-				self.initialValueChecked = true;
-			}
-		});
-	};
+	Meteor.call('afCloudinary.checksize', function(err, res){
+		if (Session.get('debug')) console.log('afCloudinaryChecksize max', res, self.checkSize.get());
+		if (err)
+			self.checkSize.set(5000000);
+		if (res)
+			self
+		.checkSize.set(res);
+	});
+
 });
 
 Template.afCloudinary.onRendered(function () {
-	var error, self = this, options = Meteor.settings.public.cloudinary;
-	var signing = Meteor.settings.public.cloudinary.config;
+	var t = Template.instance();
+	var username, error, self = this, state;
+	var config = Meteor.settings.public.cloudinary.config;
+	var options = Meteor.settings.public.cloudinary.options || {};
 	var t = Template.instance();
 	if (Session.get('debug'))  console.log('afCloudinary data', cloudinary, self.data);
-
-/* 	if (self.data && self.data.atts && self.data.atts.folder) {
-		_.extend(options, {folder: self.data.atts.folder});
-	}
-	if (self.data && self.data.atts && self.data.atts.tags) {
-		_.extend(options, {tags: self.data.atts.tags});
-	}
-
-	if (self.data && self.data.atts && self.data.atts.resourceType && self.data.atts.resourceType==='file') {
-		_.extend(options, {use_filename: true});
-	}
-	
-	options.upload_preset = Meteor.settings.public.cloudinary.cloudinary_preset;
-
-	//options.use_filename = true;
-	if (self.data.atts.tags)
-		options.tags = self.data.atts.tags + ', ' + Meteor.settings.public.CLOUDINARY_TAGS;
-	else if (Meteor.settings.public.CLOUDINARY_TAGS)
-		options.tags = Meteor.settings.public.CLOUDINARY_TAGS;
-
-	if (self.data.atts.folder)
-		options.folder = self.data.atts.folder;		
-	// if (Meteor.settings.public.CLOUDINARY_FOLDER_PREFIX)
-		// options.folder = Meteor.settings.public.CLOUDINARY_FOLDER_PREFIX; */
-	
 
 	var env = __meteor_runtime_config__.ROOT_URL.match(/www|stg|app|dev/);
 	if (env)
 		env = env[0];
 	else
 		env = 'dev';
-	
 	var host = __meteor_runtime_config__.ROOT_URL.split('/')[2];
-	
-	var username; 
-	if (Meteor.user())
-		username = Meteor.user().username;
-	// options.tags = Meteor.settings.public.cloudinary.tags || '';
-	// options.tags = options.tags + ', ' + env + ', ' + host + ', ' + Meteor.userId() + ', ' + username;
-	
-	// if (!options.unique_filename && Meteor.settings.public.CLOUDINARY_UNIQ)
-		// options.unique_filename = Meteor.settings.public.CLOUDINARY_UNIQ;
 
-	var atts = self.data.atts;
-/* 	if (!atts.tags)
-		atts.tags = options.tags;
-	if (!atts.folder)
-		atts.folder = options.folder; */
-	//atts.resource_type  = 'auto'	;
-	if (Session.get('debug')) 
-		console.log('self.atts.set', atts, 'data:', self.data, '\n\n');
-	self.atts.set(atts);		
-	
-	options.autoUpload = false;
-	options.limitMultiFileUploads = 3;
-	options.limitConcurrentUploads = 3;
-	options.maxFileSize = self.checkSize.get();
-	options.url ='https://api.cloudinary.com/v1_1/' + Meteor.settings.public.cloudinary.config.cloud_name +'/auto/upload';
-
-	Tracker.autorun(function () {	
-/* 		if (self.atts.get() && self.atts.get().tags)
-			options.tags = options.tags + ', ' + self.atts.get().tags;
-		if (self.atts.get() && self.atts.get().folder)
-			options.folder = self.atts.get().folder; */
-		//options.upload_preset = 'xlazzRaw';
-		//options.resource_type  = 'auto'	;
-/* 			if (self.data && self.data.atts)
-			options = self.data.atts; */
-		
-		// if (self.data && self.data.atts)	
-			// console.log('afCloudinarySign onRendered data.atts:', self, 'self:', self, 'options:', options, 'self:', self, '\n\n\n');
-
-		Meteor.call('afCloudinary.sign', signing, function (err, res) {
-			if (err) {
-				return console.log(err);
-			}
-			if (Session.get('debug')) 
-				console.log('afCloudinarySign res:', res, '\noptions:', signing, '\n\n\n');
-
-			//console.log('> afCloudinarySign.res', res);
-
-			self.$('input[name=file]').cloudinary_fileupload({
-				formData: res
-			});
-		});		
-	});	
-
-/* 	self.$('input[name=file]').cloudinary_fileupload({
-		autoUpload: false,
-		limitMultiFileUploads: 3,
-		limitConcurrentUploads: 3,
-		maxFileSize: self.checkSize.get(),
-		url: 'https://api.cloudinary.com/v1_1/' + ufg/auto/upload',
-	// plus any other options, eg. maxFileSize
-	});	 */
-	
-	self.$('input[name=file]').cloudinary_fileupload(options);
-		
-	Meteor.call('afCloudinary.checksize', function(err, res){
-		if (Session.get('debug')) console.log('afCloudinaryChecksize max', res, t.checkSize.get());
-		if (err)
-			t.checkSize.set(5000000);
-		if (res)
-			t.checkSize.set(res);
+	t.autorun(()=>{
+		if (!Meteor.user()) return;
+		options.maxFileSize = t.checkSize.get() || options.maxFileSize || 200000;
+		options.url ='https://api.cloudinary.com/v1_1/' + Meteor.settings.public.cloudinary.config.cloud_name +'/auto/upload';
+		options.tags = options.tags + ', ' + Meteor.user().username + ', ' + env;
 	});
 
-/* 	self.$('input[name=file]').unsigned_cloudinary_upload(
-		Meteor.settings.public.cloudinary.upload_preset,
-		options,
-		{multiple: true}
-	); */
-	
-	self.$('input[name=file]').bind('fileuploadadd', function(e, data) {
+	t.autorun(function () {
+		if (self.data && self.data.atts) {
+			t.atts.set(self.data.atts);
+			if (self.data.atts.folder) config.folder = self.data.atts.folder;
+			if (self.data.atts.tags) options.tags = options.tags + ', ' + self.data.atts.tags;
+			if (self.data.atts.unique_filename === false) config.unique_filename = false;
+			//if (Session.get('debug')) console.log('self.atts.set', self.data.atts, 'data:', self.data, '\n\n');
+		}
+		console.log('self.data:', self.data, '\n\n');
+
+		if (Session.get('debug') && self.data && self.data.atts)
+			console.log('afCloudinarySign onRendered data.atts self.data:', self.data, 'options:', options, '\n\n');
+
+		config.tags = options.tags;
+		Meteor.call('afCloudinary.sign', config, function (err, res) {
+			if (err) return console.warn('afCloudinary.sign err', err);
+			var cloudinary = options;
+			cloudinary.formData = res;
+			self.$('input[name=file]').cloudinary_fileupload(cloudinary);
+			if (Session.get('debug')) console.log('afCloudinarySign cloudinary:', cloudinary, '\nres:', res, '\noptions:', config, '\n\n\n');
+		});
+	});
+
+	self.$('input[name=file]')
+		.bind('fileuploadadd', function(e, data) {
 			var file = data.files[0];
-			jqXHR = data.submit();
+			getMeta(file);
+			var state = data.submit();
 			if (Session.get('debug')) console.log('afCloudinary add:', file.size, t.checkSize.get(),  data, '\n\n\n');
-			if (file.size > self.checkSize.get()) {
+			if (file.size > t.checkSize.get()) {
 				error = file.name + ' is too big, max size is ' + parseInt(t.checkSize.get()/1024/1024*10)/10 + 'MB';
 				t.errorState.set(error);
 				Bert.alert({
@@ -187,63 +125,60 @@ Template.afCloudinary.onRendered(function () {
 					type: 'danger',
 					style: 'growl-top-right',
 				});
-				jqXHR.abort();
+				state.abort();
 				return console.warn('afCloudinary add', error);
 			} 
 		})
 		.bind('fileuploadsend', function(e, data) {
 			var file = data.files[0];
-			if (Session.get('debug')) console.log('afCloudinary send:', file.size, self.checkSize.get(), data.url, data, '\n\n\n');
-			if (data.url == 'https://api.cloudinary.com/v1_1/undefined/auto/upload'){				
-				console.log('afCloudinary url undefined, send abort:', file, data.url, data, '\n\n\n');
-				return jqXHR.abort();
+			//if (Session.get('debug')) console.log('afCloudinary send:', file.size, self.checkSize.get(), data.url, data, '\n\n\n');
+			if (data.url == 'https://api.cloudinary.com/v1_1/undefined/auto/upload'){
+				console.warn('afCloudinary url undefined, send abort:', file, data.url, data, '\n\n\n');
+				//return state.abort();
+				return;
 			}
-			self.$('.uploader').prop('disabled', true).removeClass("browse");
-			self.$('.uploader').text('0%');				
+			self.$('.uploader').prop('disabled', true).removeClass("browse").addClass('cancelUpload');
+			//self.$('.uploader').text('0%');
 			_Files.insert({filename: file.name, type: file.type, size: file.size});
+			console.log('afCloudinary send:', data, file);
 		})
 		.bind('fileuploadprogress', function(e, data) {
-		//$('.progress_bar').css('width', Math.round((data.loaded * 100.0) / data.total) + '%');
-			var progressPercent = Math.round((data.loaded * 100.0) / data.total) + '%';
 			var file = data.files[0];
 			_Files.update({filename: file.name},{$set:{
-				progress: Math.round((data.loaded * 100.0) / data.total)
-			}});			
+				progress: Math.round((data.loaded * 100) / data.total)
+			}});
 		})
 		.bind('fileuploaddone', function (e, data) {
-			self.$('.uploader').prop('disabled', false).addClass('browse');
-			self.res.set(data.result);
-			self.errorState.set();
+			self.$('.uploader').prop('disabled', false).removeClass('cancelUpload').addClass('browse');
+			
+			t.res.set(data.result);
+			t.errorState.set();
 
-			Tracker.flush();
 			var file = data.files[0];
 			var cloud = data.result.public_id;
-			_Files.update({filename: file.name},{$set:{
+			file = _Files.findOne({filename: file.name});
+			_Files.update(file._id,{$set:{
 				status: data.textStatus, 
 				maxSize: data.maxFileSize, 
 				size: data.loaded, 
 				url:data.result.secure_url, 
 				cloud: cloud, 
 				cloudinary: data.result,
-				metadata: data.result.image_metadata
-			}});			
-			Session.set('insertedMetadata', data.result.image_metadata);
-			$('.submit').click();
-			if (Session.get('debug')) console.log('afCloudinary fileuploaddone', self.atts.get(), data.files, _Files.findOne({filename: file.name}), '\ndata:', data, '\nremove:', t.removeCloud.get(), '\n\n\n');
-			Meteor.call('afCloudinary.remove', {url: t.removeCloud.get()});
+				metadata: metaData
+			}});
+			
+			if (Session.get('debug')) console.log('\n\nafCloudinary fileuploaddone data:', data, '\natts:', t.atts.get(), '\n\n');
 			Meteor.call('afCloudinary.tag', {tag: data.result.original_filename, public_id: data.result.public_id});
-			Meteor.setTimeout(function(){
-				if (Session.get('debug')) console.log('afCloudinary checking self.atts.get()', self.atts.get());
-				if (self.atts.get().autosave) {
-					$('.btnsub').click();
-					_Files.remove({filename: file.name});
-				}
-			},100);	
-		})	
+			
+			//if form field has autosave=true
+			if (t.atts.get() && t.atts.get().autosave) {
+				var id = 'sub' + cloud.split('/').pop();
+			}
+		})
 		.bind('fileuploadfail', function (e, data) {
 			console.warn('afCloudinary fileuploadfail', data._response, '\ndata:', data);
-			self.$('.uploader').prop('disabled', false).addClass('browse');			
-			
+			self.$('.uploader').prop('disabled', false).addClass('browse');
+
 			var file = data.files[0];
 			error = self.errorState.get() || data.errorThrown;
 			self.errorState.set(error);
@@ -257,13 +192,24 @@ Template.afCloudinary.onRendered(function () {
 				style: 'growl-top-right',
 				icon: 'fa-music'
 			});
-			Tracker.flush();
-			//self.$('.browse').text('Failed');
 		});
-		
-	var removeLocal = function(filename){
-		_Files.remove({filename: file.name});
-	}
+
+	//if (t.atts.get() && t.atts.get().autosave) 
+	t.autorun(()=>{
+		console.log('cloudinary last res:', t.res.get());
+		if (!t.atts.get() || !t.atts.get().autosave) return console.log('cloudinary autosave', t.atts.get());
+
+		Meteor.setTimeout(()=>{
+			if (!_Files.find().count() || _Files.find({url:{$exists: false}}).count()) return; 
+			console.log('cloudinary url not yet', _Files.find({url:{$exists: false}}).count());
+			var files = _Files.find({url:{$exists: true}}).fetch();
+			console.log('submitting form', $('form'));
+			$('form').submit();
+			_.each(files, (file)=>{
+				_Files.remove(file._id);
+			});
+		},500);
+	});
 
 	self.$(self.firstNode).closest('form').on('reset', function () {
 		//self.url.set(null);
@@ -277,29 +223,29 @@ Template.afCloudinary.onDestroyed(function () {
 		var params = {};
 		params.cloud = cloud;
 		Meteor.call('afCloudinary.remove', params);
-		_Files.remove({cloud: cloud});	
+		_Files.remove({cloud: cloud});
 	});
 }); 
 
 Template.afCloudinary.helpers({
-	iffiles: function () {
+	iffiles(){
 		return _Files.find().count();
 	},
-	files: function () {
+	files(){
 		return _Files.find();
 	},
-	url: function () {
+	url(){
 		//console.log('if url', this);
 		if (this.value)
 			this.url = this.value;
 		return this.url;
 	},
-	cloudId: function () {
-		console.log('cloudId', this);
-		if (this.url)
-			return cloudId = this.url.split('upload/').pop();	
-	}, 	
-	thumbnail: function () {
+	cloudId(){
+		if (Session.get('debug')) console.log('cloudId', this);
+		if (this.cloud)
+			return cloudId = this.cloud.split('/').pop();
+	},
+	thumbnail(){
 		var t = Template.instance();
 		var url, upload;
 		if (!this.url)
@@ -309,108 +255,90 @@ Template.afCloudinary.helpers({
 		else
 			upload = 'upload/c_fit,h_256,fl_progressive';
 		url = this.url.replace('upload', upload );
-		console.log('afCloudinary thumbnail', this, url);
+		if (Session.get('debug')) console.log('afCloudinary thumbnail', this, url);
 		return url;
 	},
-	accept: function () {
-		return this.atts.accept || 'image/*';
+	accept(){
+		if (this.atts)
+			return this.atts.accept || 'image/*';
 	},
-	file: function () {
-		return this.atts.resourceType === 'file';
+	file(){
+		if (this.atts)	
+			return this.atts.resourceType === 'file';
 	},
-	errorState: function () {
-		var t = Template.instance();		
+	errorState(){
+		var t = Template.instance();
 		if (!t.errorState.get())
 			return;
 		var error = t.errorState.get() + '<br>Upgrade to the next plan to have it larger';
-		console.log('afCloudinary fileuploadfail error', error);
+		if (Session.get('debug')) console.log('afCloudinary fileuploadfail error', error);
 		return error;
 	},
-	addatts: function () {
+	addatts(){
 		var t = Template.instance();	
-		var filename, atts = t.atts.get();
+		var filename, atts = t.atts.get() || {};
 		if (!atts || !atts.type)
 			atts.resourceType = 'image';
 		else
 			atts.resourceType = 'file';
 		if (Session.get('debug')) console.log('afCloudinary debug addats this:', this, 'atts:', atts, '\n');
-		if (t.res.get()) {		
+		if (t.res.get()) {
 			filename = t.res.get().original_filename;
 			atts.tags = atts.tags + ', ' + filename;
-		}			
-		return atts;			
+		}
+		return atts;
 	},
-	dimensions: function () {
+	dimensions(){
 
 	},
-	debug: function (){
+	debug(){
 		if (Session.get('debug')) console.log('afCloudinary debug this:', this);
 		return 'debug';
 	}
 });
 
 Template.afCloudinary.events({
-	'change #cloudinary-filename': function (e, t) {
+	'change #cloudinary-filename'(e,t){
+		e.preventDefault();
+		e.stopPropagation();
 		if (Session.get('debug')) console.log('afCloudinary changed file', e, this);
 		var params = {};
-		console.log('remove:', this.url, e.target.id, 'this:', this, e);
+		if (Session.get('debug')) console.log('remove:', this.url, e.target.id, 'this:', this, e);
 		t.removeCloud.set(this.url);
-/* 		$('#cloudinary-filename').fileupload({
-        dataType: 'json',
-        done: function (e, data) {
-					console.log('uploading done', data);
-            $.each(data.result.files, function (index, file) {
-                $('<p/>').text(file.name).appendTo(document.body);
-            });
-        },
-				progressall: function (e, data) {
-					console.log('uploading', data);
-						var progress = parseInt(data.loaded / data.total * 100, 10);
-						$('#progress .bar').css(
-								'width',
-								progress + '%'
-						);
-				}
-		}); */
 	},
-	'input' : function (e, t) {
+	'input' (e,t){
 		if (Session.get('debug')) console.log('afCloudinary changed file2', e, this);
 	},
-	'change' : function (e, t) {
+	'change' (e,t){
 		if (Session.get('debug')) console.log('afCloudinary changed file3', e, this);
 	},
-	'click .browse' : function (e, t) {
+	'click .browse' (e,t){
 		if (Session.get('debug')) console.log('afCloudinary click browse', e, this);
 		t.removeCloud.set(this.url);
 		t.$('input[name=file]').click();
 	},
-	'click .submit' : function (e, t) {
+	'click .cancelUpload'(e,t){
+		console.log('click .cancelUpload', this);
+		_Files.remove(this._id);
+	},
+	'click .js-remove'(e,t){
 		e.preventDefault();
 		e.stopPropagation();
-		if (Session.get('debug')) console.log('afCloudinary submit class', this);		
-		Session.set('cloudinarySubmittedId', this._id);
-		
-		//document.forms['insertImagesForm'].submit();
-		$('.btnsub').click();
-		
+		console.log('clicked remove', this);
+		Meteor.call('afCloudinary.remove', {public_id: this.cloud});
+		_Files.remove(this._id);
 	},
-	'click button': function (e, t) {
-		//e.preventDefault();
-		//e.stopPropagation();
-		//console.log('submit button', e,  e.target, t, $(this).closest('form'), this);
-	},
-	'click .removeCloud': function (e, t) {
+	'click .removeCloud'(e,t){
 		e.preventDefault();
 		e.stopPropagation();
 		t.url.set(null);		
 		if (Session.get('debug')) console.log('afCloudinary remove pic:', e.target.id, '\nthis:',this, '\nevent:', e);
-		Meteor.call('afCloudinary.remove', {url: this.url});	
+		Meteor.call('afCloudinary.remove', {url: this.url});
 		_Files.remove({filename: this.filename});
-	},
-	
-	'change .cloudinary-atts': function (e, t) {	
+	},	
+	'change .cloudinary-atts'(e,t){
 		e.preventDefault();
-		var atts = t.atts.get();
+		var atts = t.atts.get() || {};
 		if (e.target.id == 'tags')
 			atts.tags = $(e.currentTarget).val();
 		else if (e.target.id == 'folder')
