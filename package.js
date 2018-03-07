@@ -1,8 +1,8 @@
 Package.describe({
 	name: 'ipstas:autoform-cloudinary3',
 	version: '1.0.2',
-	summary: 'Provides a autoform tags input with typeahead functionality',
-	git: 'https://github.com/Redroest/meteor-autoform-tags-typeahead',
+	summary: 'Provides a autoform augmented field for cloudinary upload',
+	git: 'https://github.com/ipstas/autoform-cloudinary',
 	documentation: 'README.md'
 });
 
@@ -21,7 +21,6 @@ Package.onUse(function (api) {
 		'blaze',
 		'underscore',
 		'aldeed:autoform',
-		//'tomi:upload-jquery'
 	]);
 
 	api.addFiles([
@@ -31,7 +30,6 @@ Package.onUse(function (api) {
 		'jQuery-File-Upload/js/vendor/jquery.ui.widget.js',
 		'jQuery-File-Upload/js/jquery.iframe-transport.js',
 		'jQuery-File-Upload/js/jquery.fileupload.js',
-		//'jQuery-File-Upload/js/jquery.fileupload-image.js',
 		'pkg-cloudinary-jquery-file-upload/cloudinary-jquery-file-upload.js',
 		'vendor/load-image.all.min.js'
 	], 'client');
