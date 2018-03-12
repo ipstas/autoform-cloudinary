@@ -1,6 +1,6 @@
 Package.describe({
 	name: 'ipstas:autoform-cloudinary3',
-	version: '1.0.2',
+	version: '1.0.4',
 	summary: 'Provides a autoform augmented field for cloudinary upload',
 	git: 'https://github.com/ipstas/autoform-cloudinary',
 	documentation: 'README.md'
@@ -10,9 +10,9 @@ Package.onUse(function (api) {
 	api.versionsFrom('1.1.0.3');
 
 	Npm.depends({
-		cloudinary: '1.9.1',
+		cloudinary: '1.10.0',
 		'blueimp-file-upload': '9.19.1',
-		'cloudinary-jquery-file-upload': '2.3.0',
+		'cloudinary-jquery-file-upload': '2.3.0'
 	});
 	
 	api.use([
@@ -20,7 +20,7 @@ Package.onUse(function (api) {
 		'templating',
 		'blaze',
 		'underscore',
-		'aldeed:autoform',
+		'aldeed:autoform@6.2.0'
 	]);
 
 	api.addFiles([
