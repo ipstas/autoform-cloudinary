@@ -1,6 +1,6 @@
 Package.describe({
 	name: 'ipstas:autoform-cloudinary3',
-	version: '1.0.4',
+	version: '1.0.5',
 	summary: 'Provides a autoform augmented field for cloudinary upload',
 	git: 'https://github.com/ipstas/autoform-cloudinary',
 	documentation: 'README.md'
