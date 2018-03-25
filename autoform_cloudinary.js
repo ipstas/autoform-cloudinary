@@ -72,12 +72,8 @@ Template.afCloudinary.onRendered(function () {
 	var t = Template.instance();
 	if (Session.get('debug'))  console.log('afCloudinary data', cloudinary, self.data);
 
-	var env = __meteor_runtime_config__.ROOT_URL.match(/www|stg|app|dev/);
-	if (env)
-		env = env[0];
-	else
-		env = 'dev';
-	var host = __meteor_runtime_config__.ROOT_URL.split('/')[2];
+	var env = __meteor_runtime_config__.ROOT_URL.match(/www|stg|app/) || [dev];
+	env = env[0];
 
 	t.autorun(()=>{
 		if (!Meteor.user()) return;
