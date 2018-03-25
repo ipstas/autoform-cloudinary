@@ -7,9 +7,9 @@
       "integrity": "sha1-VnmsMvaig1gh8MOtZhcZ/4WpI2s="
     },
     "blueimp-file-upload": {
-      "version": "9.19.1",
-      "resolved": "https://registry.npmjs.org/blueimp-file-upload/-/blueimp-file-upload-9.19.1.tgz",
-      "integrity": "sha512-y4jA9LNjfS8vU+vf0ysosxmEQG+7xlSi6l0tWs2HSmIavsnJFp51bzajNzO6H7WFtyciKbBuolgXmQmdT3IUBQ=="
+      "version": "9.21.0",
+      "resolved": "https://registry.npmjs.org/blueimp-file-upload/-/blueimp-file-upload-9.21.0.tgz",
+      "integrity": "sha512-lDsM4m6PETB0CXyKZHiSQd/HhBCCTxMwGCUnnIDG46bVsUsL/McrodXwaNZ//poUopH46XQvBdY/SnJFKK3DEg=="
     },
     "blueimp-load-image": {
       "version": "2.12.2",
@@ -22,14 +22,19 @@
       "integrity": "sha1-pJEJddBC4rwDunfw5i0E8VSKUkw="
     },
     "cloudinary": {
-      "version": "1.10.0",
-      "resolved": "https://registry.npmjs.org/cloudinary/-/cloudinary-1.10.0.tgz",
-      "integrity": "sha512-+8GXHTNPKAcCKiSGYwdglIUYMjXxKoOgAVXPQMrDEHjSTVovCeqVnUtoXdF+v0RyAkAqK/sun0hJd5uw4o0plA=="
+      "version": "1.11.0",
+      "resolved": "https://registry.npmjs.org/cloudinary/-/cloudinary-1.11.0.tgz",
+      "integrity": "sha512-U5j9aWaYrSteboC7KcFZhvWy734d60CrrEUHVMpCtKhEWxpxXyVSe4Ag1BnRaVVq0YOvlJpXe6Qt6hAcb+h1lg=="
     },
     "cloudinary-jquery-file-upload": {
-      "version": "2.3.0",
-      "resolved": "https://registry.npmjs.org/cloudinary-jquery-file-upload/-/cloudinary-jquery-file-upload-2.3.0.tgz",
-      "integrity": "sha1-CPUAerfRJ2kw49hjh5OsU0ZK4xk="
+      "version": "2.5.0",
+      "resolved": "https://registry.npmjs.org/cloudinary-jquery-file-upload/-/cloudinary-jquery-file-upload-2.5.0.tgz",
+      "integrity": "sha512-UsF9gbf7effFaLG5AuVdjnk+9n+P8qWdL//eIm3tdE8E2WaSCgI4M0Xj28WEXwwsT4eH+6GIjauI6QatZVivtA=="
+    },
+    "jquery": {
+      "version": "2.2.4",
+      "resolved": "https://registry.npmjs.org/jquery/-/jquery-2.2.4.tgz",
+      "integrity": "sha1-LInWiJterFIqfuoywUUhVZxsvwI="
     },
     "lodash": {
       "version": "4.17.5",

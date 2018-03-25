@@ -1,8 +1,12 @@
-AutoForm.debug();
+//AutoForm.debug();
 
 //import * as cloudinary from 'cloudinary-jquery-file-upload';
 //const cloudinary = require('cloudinary-jquery-file-upload');
 //import { Mongo } from 'meteor/mongo';
+
+//import 'js/load-image.js';
+
+console.log('autoform cloudinary', loadImage);
 
 const _Files = new Mongo.Collection(null);
 window._localFiles = _Files;
@@ -70,12 +74,12 @@ Template.afCloudinary.onRendered(function () {
 	var config = Meteor.settings.public.cloudinary.config;
 	var options = Meteor.settings.public.cloudinary.options || {};
 	var t = Template.instance();
-	if (Session.get('debug'))  console.log('afCloudinary data', cloudinary, self.data);
+	if (Session.get('debug'))  console.log('afCloudinary data', self.data);
 
-	var env = __meteor_runtime_config__.ROOT_URL.match(/www|stg|app/) || [dev];
+	var env = __meteor_runtime_config__.ROOT_URL.match(/www|stg|app/) || ['dev'];
 	env = env[0];
 
-	t.autorun(()=>{
+	t.autorun(function(){
 		if (!Meteor.user()) return;
 		options.maxFileSize = t.checkSize.get() || options.maxFileSize || 200000;
 		options.url ='https://api.cloudinary.com/v1_1/' + Meteor.settings.public.cloudinary.config.cloud_name +'/auto/upload';
@@ -191,17 +195,17 @@ Template.afCloudinary.onRendered(function () {
 		});
 
 	//if (t.atts.get() && t.atts.get().autosave) 
-	t.autorun(()=>{
+	t.autorun(function(){
 		console.log('cloudinary last res:', t.res.get());
 		if (!t.atts.get() || !t.atts.get().autosave) return console.log('cloudinary autosave', t.atts.get());
 
-		Meteor.setTimeout(()=>{
+		Meteor.setTimeout(function(){
 			if (!_Files.find().count() || _Files.find({url:{$exists: false}}).count()) return; 
 			console.log('cloudinary url not yet', _Files.find({url:{$exists: false}}).count());
 			var files = _Files.find({url:{$exists: true}}).fetch();
 			console.log('submitting form', $('form'));
 			$('form').submit();
-			_.each(files, (file)=>{
+			_.each(files, function(file){
 				_Files.remove(file._id);
 			});
 		},500);
