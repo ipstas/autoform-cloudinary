@@ -1,14 +1,16 @@
 //const cloudinary 'cloudinary';
-const cloudinary = Npm.require('cloudinary');
+//import {cloudinary} from 'cloudinary';
+var cloudinary = Npm.require('cloudinary');
 
 if (!Meteor.settings.private.cloudinary || !Meteor.settings.public.cloudinary|| !Meteor.settings.public.cloudinary.config) return console.warn('No cloudinary config is found');	
 
 //return;
-var cloudConf = {
-	cloud_name: Meteor.settings.public.cloudinary.config.cloud_name,
-	api_key: Meteor.settings.public.cloudinary.config.api_key,
+const cloudinaryConf = Meteor.settings.public.cloudinary.config;
+cloudinary.config({
+	cloud_name: cloudinaryConf.cloud_name,
+	api_key: cloudinaryConf.api_key,
 	api_secret: Meteor.settings.private.cloudinary.api_secret
-};
+});
 
 if (process.env.CLOUDINARY_URL) {
 	var cloudinaryURL = new URI(process.env.CLOUDINARY_URL);
@@ -17,14 +19,21 @@ if (process.env.CLOUDINARY_URL) {
 Meteor.methods({
 	'afCloudinary.sign' (params) {
 		check(params, Match.Optional(Object));
-
+		let signed;
 		var config = {
 			upload_preset: params.upload_preset,
 			folder: params.folder,
 			tags: params.tags,
 			timestamp: (new Date).getTime()
 		};
-		var signed = cloudinary.utils.sign_request(config, cloudConf);
+		console.log('\nCloudinary signing \nparams 0:', params, '\nconfig out:', config, cloudinaryConf, '\n\n');
+		
+		try {
+			signed = cloudinary.utils.sign_request(config, cloudinaryConf);
+		} catch(e){
+			console.warn('afCloudinary.sign err:', e);
+		}
+		 
 		//if (params.debug) 
 			console.log('\nCloudinary signing \nparams in:', params, '\nconfig out:', config, '\nsigned:', signed, '\n\n');
     return signed
@@ -39,7 +48,7 @@ Meteor.methods({
 			return;
 
 		var list;
-		var config = cloudinary.config(cloudConf);
+		cloudinary.config(cloudConf);
 		if (params.url)
 			params.public_id = params.url.split('upload/')[1].split('.')[0].split('/').slice(1).join('/');
 		try {
@@ -58,7 +67,7 @@ Meteor.methods({
 		var uploaded;
     check(params, Match.Optional(Object));
     params = params || {};
-		var config = cloudinary.config(cloudConf);
+		cloudinary.config(cloudinaryConf);
 		if (params.url)
 			params.public_id = params.url.split('upload/')[1].split('.')[0].split('/').slice(1).join('/');
 		try {

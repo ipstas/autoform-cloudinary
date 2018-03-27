@@ -1,27 +1,42 @@
 //AutoForm.debug();
 
 //import * as cloudinary from 'cloudinary-jquery-file-upload';
-//const cloudinary = require('cloudinary-jquery-file-upload');
-//import { Mongo } from 'meteor/mongo';
-
-//import 'js/load-image.js';
-
-console.log('autoform cloudinary', loadImage);
 
 const _Files = new Mongo.Collection(null);
 window._localFiles = _Files;
-
+const settings = Meteor.settings.public.cloudinary;
+const config = settings.config;
+let options = settings.options || {};
+options.url ='https://api.cloudinary.com/v1_1/' + config.cloud_name +'/auto/upload';
+let env = __meteor_runtime_config__.ROOT_URL.match(/www|stg|app/) || ['dev'];
+env = env[0];
 let metaData;
+//const ExifImage = require('exif').ExifImage;
+//import ExifImage from 'exif';
+//import 'fast-exif';
+//import * from 'fast-exif';
+//import jQueryBridget from 'jquery-bridget';
+//import {loadImage} from 'blueimp-load-image';
+//$.fn.dosomething = dosomething
+//import * as cloudinary from 'cloudinary-jquery-file-upload';
+//window.cloudinary2 = cloudinary;
+//console.log('cloudinary', cloudinary, $);
+//jQueryBridget( 'cloudinary', cloudinary, $ );
+//import cloudinary from ('cloudinary-core');
+//const cl = new cloudinary.Cloudinary(config);
+//
+//console.log('cloudinary', ExifImage);
+//
+console.log('cloudinary', loadImage);
+
 function getMeta(blob){
-	loadImage.parseMetaData(
-		blob,
-		function (data) {
+/* 	loadImage.parseMetaData(blob, function (data) {
 			if (!data.exif) return;
-			if (Session.get('debug')) console.log('cloudinary getMeta', data.exif.getAll(), data.imageHead);
+			//if (Session.get('debug')) console.log('cloudinary getMeta', data.exif.getAll(), data.imageHead);
 			metaData = data.exif.getAll();
 			Session.set('insertedMetadata', metaData);
 		},
-	);
+	); */
 }
 
 AutoForm.addInputType("cloudinary", {
@@ -50,39 +65,32 @@ Template.afCloudinary.onCreated(function () {
 	t.atts = new ReactiveVar({});
 	t.files = new ReactiveVar({});
 	t.errorState = new ReactiveVar();
-	t.checkSize = new ReactiveVar();
+	t.checkSize = new ReactiveVar(5000000);
 	t.removeCloud = new ReactiveVar();
 	
 	Session.set('cloudinarySubmittedId');
 	
-	self.initialValueChecked = false;
+	//self.initialValueChecked = false;
+	//self.checkSize.set(5000000);
 	
 	Meteor.call('afCloudinary.checksize', function(err, res){
 		if (Session.get('debug')) console.log('afCloudinaryChecksize max', res, self.checkSize.get());
-		if (err)
-			self.checkSize.set(5000000);
 		if (res)
-			self
-		.checkSize.set(res);
+			t.checkSize.set(res);
 	});
 
 });
 
 Template.afCloudinary.onRendered(function () {
-	var t = Template.instance();
-	var username, error, self = this, state;
-	var config = Meteor.settings.public.cloudinary.config;
-	var options = Meteor.settings.public.cloudinary.options || {};
-	var t = Template.instance();
-	if (Session.get('debug'))  console.log('afCloudinary data', self.data);
+	let t = Template.instance();
+	let username, error, self = this, state;
 
-	var env = __meteor_runtime_config__.ROOT_URL.match(/www|stg|app/) || ['dev'];
-	env = env[0];
+	if (Session.get('debug'))  console.log('afCloudinary data', self.data);
 
 	t.autorun(function(){
 		if (!Meteor.user()) return;
 		options.maxFileSize = t.checkSize.get() || options.maxFileSize || 200000;
-		options.url ='https://api.cloudinary.com/v1_1/' + Meteor.settings.public.cloudinary.config.cloud_name +'/auto/upload';
+		//options.url ='https://api.cloudinary.com/v1_1/' + config.cloud_name +'/auto/upload';
 		options.tags = options.tags + ', ' + Meteor.user().username + ', ' + env;
 	});
 
@@ -92,9 +100,7 @@ Template.afCloudinary.onRendered(function () {
 			if (self.data.atts.folder) config.folder = self.data.atts.folder;
 			if (self.data.atts.tags) options.tags = options.tags + ', ' + self.data.atts.tags;
 			if (self.data.atts.unique_filename === false) config.unique_filename = false;
-			//if (Session.get('debug')) console.log('self.atts.set', self.data.atts, 'data:', self.data, '\n\n');
 		}
-		console.log('self.data:', self.data, '\n\n');
 
 		if (Session.get('debug') && self.data && self.data.atts)
 			console.log('afCloudinarySign onRendered data.atts self.data:', self.data, 'options:', options, '\n\n');
@@ -102,10 +108,10 @@ Template.afCloudinary.onRendered(function () {
 		config.tags = options.tags;
 		Meteor.call('afCloudinary.sign', config, function (err, res) {
 			if (err) return console.warn('afCloudinary.sign err', err);
-			var cloudinary = options;
-			cloudinary.formData = res;
-			self.$('input[name=file]').cloudinary_fileupload(cloudinary);
-			if (Session.get('debug')) console.log('afCloudinarySign cloudinary:', cloudinary, '\nres:', res, '\noptions:', config, '\n\n\n');
+			var upload = options;
+			upload.formData = res;
+			self.$('input[name=file]').cloudinary_fileupload(upload);
+			if (Session.get('debug')) console.log('afCloudinarySign cloudinary:', upload, '\nres:', res, '\noptions:', config, '\n\n\n');
 		});
 	});
 
@@ -131,14 +137,11 @@ Template.afCloudinary.onRendered(function () {
 		})
 		.bind('fileuploadsend', function(e, data) {
 			var file = data.files[0];
-			//if (Session.get('debug')) console.log('afCloudinary send:', file.size, self.checkSize.get(), data.url, data, '\n\n\n');
 			if (data.url == 'https://api.cloudinary.com/v1_1/undefined/auto/upload'){
 				console.warn('afCloudinary url undefined, send abort:', file, data.url, data, '\n\n\n');
-				//return state.abort();
 				return;
 			}
 			self.$('.uploader').prop('disabled', true).removeClass("browse").addClass('cancelUpload');
-			//self.$('.uploader').text('0%');
 			_Files.insert({filename: file.name, type: file.type, size: file.size});
 			console.log('afCloudinary send:', data, file);
 		})
@@ -194,7 +197,6 @@ Template.afCloudinary.onRendered(function () {
 			});
 		});
 
-	//if (t.atts.get() && t.atts.get().autosave) 
 	t.autorun(function(){
 		console.log('cloudinary last res:', t.res.get());
 		if (!t.atts.get() || !t.atts.get().autosave) return console.log('cloudinary autosave', t.atts.get());
@@ -211,9 +213,6 @@ Template.afCloudinary.onRendered(function () {
 		},500);
 	});
 
-	self.$(self.firstNode).closest('form').on('reset', function () {
-		//self.url.set(null);
-	});
 });
 
 Template.afCloudinary.onDestroyed(function () {
@@ -235,7 +234,6 @@ Template.afCloudinary.helpers({
 		return _Files.find();
 	},
 	url(){
-		//console.log('if url', this);
 		if (this.value)
 			this.url = this.value;
 		return this.url;
