@@ -50,7 +50,7 @@
 										<i class="fa fa-spinner fa-pulse animated fadeIn"></i>
 										<span class="sr-only">Loading...</span>
 									{{else}}
-										{{progress}}%
+										Loading... {{progress}}%
 									{{/if}}
 								</span>
 							{{else}}
@@ -65,7 +65,20 @@
 			{{#if url}}
 				<div id="{{cloudId}}" class="pointer browse afCloudinary-thumbnail form-group animated fadeIn text-center">
 					<img class="animated fadeIn iffiles cloudinary100" alt="{{filename}}" src="{{thumbnail}}"  >
+					{{debug}}
 				</div>
+				<input {{addatts}} {{atts}}
+					style="display: none"
+					id="{{filename}}"
+					type="hidden"
+					name="url"
+					value="{{url}}">
+				<input 
+					style="display: none"
+					type="hidden"
+					name="file"
+					data-schema-key="file"
+					value="{{filename}}">
 			{{else}}
 				<div role="button" class="uploader drophere jumbotron jumbotron-fluid browse btn-default animated fadeIn fontlarge48">
 					<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>

@@ -62,6 +62,7 @@ Template.afCloudinary.onCreated(function () {
 
 	t.url = new ReactiveVar();
 	t.res = new ReactiveVar();
+	t.name = new ReactiveVar();
 	t.atts = new ReactiveVar({});
 	t.files = new ReactiveVar({});
 	t.errorState = new ReactiveVar();
@@ -95,6 +96,7 @@ Template.afCloudinary.onRendered(function () {
 	});
 
 	t.autorun(function () {
+		if (t.name.get() != self.data.atts.name) return console.log('[afCloudinary] wrong name', t.name.get() != self.data.atts.name, t.name.get(), self.data.atts);
 		if (self.data && self.data.atts) {
 			t.atts.set(self.data.atts);
 			if (self.data.atts.folder) config.folder = self.data.atts.folder;
@@ -142,12 +144,16 @@ Template.afCloudinary.onRendered(function () {
 				return;
 			}
 			self.$('.uploader').prop('disabled', true).removeClass("browse").addClass('cancelUpload');
-			_Files.insert({filename: file.name, type: file.type, size: file.size});
+			//let file = _Files.findOne({name: t.name.get()});
+			if (!_Files.findOne({name: t.name.get()}))
+				_Files.insert({name: t.name.get(), filename: file.name, type: file.type, size: file.size});
+			else
+				_Files.update({name: t.name.get()}, {$set: {filename: file.name, type: file.type, size: file.size}});
 			console.log('afCloudinary send:', data, file);
 		})
 		.bind('fileuploadprogress', function(e, data) {
-			var file = data.files[0];
-			_Files.update({filename: file.name},{$set:{
+			//var file = data.files[0];
+			_Files.update({name: t.name.get()},{$set:{
 				progress: Math.round((data.loaded * 100) / data.total)
 			}});
 		})
@@ -157,9 +163,9 @@ Template.afCloudinary.onRendered(function () {
 			t.res.set(data.result);
 			t.errorState.set();
 
-			var file = data.files[0];
+			//var file = data.files[0];
 			var cloud = data.result.public_id;
-			file = _Files.findOne({filename: file.name});
+			let file = _Files.findOne({name: t.name.get()});
 			_Files.update(file._id,{$set:{
 				status: data.textStatus, 
 				maxSize: data.maxFileSize, 
@@ -186,7 +192,7 @@ Template.afCloudinary.onRendered(function () {
 			error = self.errorState.get() || data.errorThrown;
 			self.errorState.set(error);
 
-			_Files.remove({filename: file.name});
+			_Files.remove({name: t.name.get()});
 			Bert.alert({
 				hideDelay: 6000,
 				title: 'Upload failed',
@@ -228,12 +234,18 @@ Template.afCloudinary.onDestroyed(function () {
 
 Template.afCloudinary.helpers({
 	iffiles(){
-		return _Files.find().count();
+		let t = Template.instance();
+		if (!t.atts.get() || t.atts.get().name != this.name) return;
+		let data = _Files.find().count();
+		if (Session.get('debug')) console.log('iffiles', data, 'this:', this, 'atts:', t.atts.get() );
+		return data;
 	},
 	files(){
 		return _Files.find();
 	},
 	url(){
+		let t = Template.instance();
+		if (Session.get('debug')) console.log('url', this, 'atts:', t.atts.get() );
 		if (this.value)
 			this.url = this.value;
 		return this.url;
@@ -291,7 +303,7 @@ Template.afCloudinary.helpers({
 	},
 	debug(){
 		if (Session.get('debug')) console.log('afCloudinary debug this:', this);
-		return 'debug';
+		//return 'debug';
 	}
 });
 
@@ -303,9 +315,11 @@ Template.afCloudinary.events({
 		var params = {};
 		if (Session.get('debug')) console.log('remove:', this.url, e.target.id, 'this:', this, e);
 		t.removeCloud.set(this.url);
+		//t.name.set(this.name);
 	},
 	'input' (e,t){
 		if (Session.get('debug')) console.log('afCloudinary changed file2', e, this);
+		//t.name.set(this.name);
 	},
 	'change' (e,t){
 		if (Session.get('debug')) console.log('afCloudinary changed file3', e, this);
@@ -314,6 +328,7 @@ Template.afCloudinary.events({
 		if (Session.get('debug')) console.log('afCloudinary click browse', e, this);
 		t.removeCloud.set(this.url);
 		t.$('input[name=file]').click();
+		t.name.set(this.name);
 	},
 	'click .cancelUpload'(e,t){
 		console.log('click .cancelUpload', this);
