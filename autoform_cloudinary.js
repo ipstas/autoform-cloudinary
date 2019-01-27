@@ -79,6 +79,8 @@ Template.afCloudinary.onCreated(function () {
 		if (res)
 			t.checkSize.set(res);
 	});
+	
+	if (Session.get('debug'))  console.log('[afCloudinary onCreated] data', self.data);
 
 });
 
@@ -86,7 +88,7 @@ Template.afCloudinary.onRendered(function () {
 	let t = Template.instance();
 	let username, error, self = this, state;
 
-	if (Session.get('debug'))  console.log('afCloudinary data', self.data);
+	if (Session.get('debug'))  console.log('[afCloudinary onRendered] data', self.data, '\ncurrent:', Template.currentData(), '\nparent:', Template.parentData(1));
 
 	t.autorun(function(){
 		if (!Meteor.user()) return;
@@ -146,7 +148,7 @@ Template.afCloudinary.onRendered(function () {
 			self.$('.uploader').prop('disabled', true).removeClass("browse").addClass('cancelUpload');
 			//let file = _Files.findOne({name: t.name.get()});
 			if (!_Files.findOne({name: t.name.get()}))
-				_Files.insert({name: t.name.get(), filename: file.name, type: file.type, size: file.size});
+				_Files.insert({fieldId: self.data.atts.id, name: t.name.get(), filename: file.name, type: file.type, size: file.size});
 			else
 				_Files.update({name: t.name.get()}, {$set: {filename: file.name, type: file.type, size: file.size}});
 			console.log('afCloudinary send:', data, file);
@@ -211,9 +213,10 @@ Template.afCloudinary.onRendered(function () {
 			if (!_Files.find().count() || _Files.find({url:{$exists: false}}).count()) return; 
 			console.log('cloudinary url not yet', _Files.find({url:{$exists: false}}).count());
 			var files = _Files.find({url:{$exists: true}}).fetch();
-			console.log('submitting form', $('form'));
+			console.log('[afCloudinary] submitting form', $('form'), 'files:', files);
 			$('form').submit();
 			_.each(files, function(file){
+				console.log('[afCloudinary] removing after submit file', file);
 				_Files.remove(file._id);
 			});
 		},500);
@@ -222,13 +225,11 @@ Template.afCloudinary.onRendered(function () {
 });
 
 Template.afCloudinary.onDestroyed(function () {
-	var files = (_Files.find().fetch());
-	if (Session.get('debug')) console.log('destroying clouds in autoform on onDestroyed', files);
-	_.each(files.cloud, function(cloud){
-		var params = {};
-		params.cloud = cloud;
-		Meteor.call('afCloudinary.remove', params);
-		_Files.remove({cloud: cloud});
+	let files = _.pluck(_Files.find({cloud: {$exists: true}}).fetch(), '_id');
+	
+	if (Session.get('debug')) console.log('destroying clouds in autoform on onDestroyed', _Files.find({cloud: {$exists: true}}).fetch());
+	_.each(files, function(_id){
+		_Files.remove({_id: _id});
 	});
 }); 
 
@@ -236,22 +237,22 @@ Template.afCloudinary.helpers({
 	iffiles(){
 		let t = Template.instance();
 		if (!t.atts.get() || t.atts.get().name != this.name) return;
-		let data = _Files.find().count();
-		if (Session.get('debug')) console.log('iffiles', data, 'this:', this, 'atts:', t.atts.get() );
-		return data;
+		let data = _Files.find({name: this.name});
+		if (Session.get('debug')) console.log('[afCloudinary] iffiles:', data.fetch(), '\nthis:', this, '\natts:', t.atts.get(), '\ncurrent:', Template.currentData() );
+		return data.count();
 	},
 	files(){
-		return _Files.find();
+		return _Files.find({name: this.name});
 	},
 	url(){
 		let t = Template.instance();
-		if (Session.get('debug')) console.log('url', this, 'atts:', t.atts.get() );
+		//if (Session.get('debug')) console.log('url', this, 'atts:', t.atts.get() );
 		if (this.value)
 			this.url = this.value;
 		return this.url;
 	},
 	cloudId(){
-		if (Session.get('debug')) console.log('cloudId', this);
+		//if (Session.get('debug')) console.log('cloudId', this);
 		if (this.cloud)
 			return cloudId = this.cloud.split('/').pop();
 	},
@@ -291,7 +292,7 @@ Template.afCloudinary.helpers({
 			atts.resourceType = 'image';
 		else
 			atts.resourceType = 'file';
-		if (Session.get('debug')) console.log('afCloudinary debug addats this:', this, 'atts:', atts, '\n');
+		//if (Session.get('debug')) console.log('afCloudinary debug addats this:', this, 'atts:', atts, '\n');
 		if (t.res.get()) {
 			filename = t.res.get().original_filename;
 			atts.tags = atts.tags + ', ' + filename;
@@ -302,7 +303,7 @@ Template.afCloudinary.helpers({
 
 	},
 	debug(){
-		if (Session.get('debug')) console.log('afCloudinary debug this:', this);
+		//if (Session.get('debug')) console.log('afCloudinary debug this:', this);
 		//return 'debug';
 	}
 });
@@ -358,6 +359,9 @@ Template.afCloudinary.events({
 			atts.folder = $(e.currentTarget).val();
 		t.atts.set(atts);
 		if (Session.get('debug')) console.log('changed t.atts.set', atts);
+	},
+	'submit'(e,t){
+		console.log('[afCloudinary] submit', e, this);
 	}
 });
 

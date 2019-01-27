@@ -36,13 +36,13 @@
 								<input type="text" id="tags" name="tags" placeholder="tags" class="cloudinary-atts form-control" value="{{addatts.tags}}">
 							</div>
 							<div class="col-xs-5 col-sm-3">
-								<div role="button" class="uploader drophere jumbotron jumbotron-fluid browse btn-default text-center animated fadeIn ">
+								<div role="button" class="uploader drophere jumbotron browse btn-default text-center animated fadeIn ">
 									<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
 								</div>
 							</div>
 						</div>
 					{{else}}
-						<div role="button" class="uploader drophere jumbotron jumbotron-fluid btn-default text-center animated fadeIn fontlarge48" data-toggle="tooltip" tooltip="Drop file here">
+						<div role="button" class="uploader drophere jumbotron btn-default text-center animated fadeIn fontlarge48" data-toggle="tooltip" tooltip="Drop file here">
 							{{#if progress}}
 								<span class="close cancelUpload red"><span class="glyphicon glyphicon-remove animated fadeIn "></span></span>
 								<span class="">
@@ -80,7 +80,7 @@
 					data-schema-key="file"
 					value="{{filename}}">
 			{{else}}
-				<div role="button" class="uploader drophere jumbotron jumbotron-fluid browse btn-default animated fadeIn fontlarge48">
+				<div role="button" class="uploader drophere jumbotron jumbotron-fluid text-center browse btn-default animated fadeIn fontlarge48">
 					<i class="fa fa-cloud-upload linkblue pointer animated fadeIn " aria-hidden="true"></i>
 				</div>
 			{{/if}}
