@@ -1,6 +1,6 @@
 //AutoForm.debug();
 
-//import * as cloudinary from 'cloudinary-jquery-file-upload';
+import * as cloudinary from 'cloudinary-jquery-file-upload';
 
 const _Files = new Mongo.Collection(null);
 window._localFiles = _Files;
@@ -27,7 +27,7 @@ let metaData;
 //
 //console.log('cloudinary', ExifImage);
 //
-console.log('cloudinary', loadImage);
+//console.log('cloudinary', loadImage);
 
 function getMeta(blob){
 /* 	loadImage.parseMetaData(blob, function (data) {
@@ -151,7 +151,7 @@ Template.afCloudinary.onRendered(function () {
 				_Files.insert({fieldId: self.data.atts.id, name: t.name.get(), filename: file.name, type: file.type, size: file.size});
 			else
 				_Files.update({name: t.name.get()}, {$set: {filename: file.name, type: file.type, size: file.size}});
-			console.log('afCloudinary send:', data, file);
+			//console.log('afCloudinary send:', data, file);
 		})
 		.bind('fileuploadprogress', function(e, data) {
 			//var file = data.files[0];
@@ -211,12 +211,12 @@ Template.afCloudinary.onRendered(function () {
 
 		Meteor.setTimeout(function(){
 			if (!_Files.find().count() || _Files.find({url:{$exists: false}}).count()) return; 
-			console.log('cloudinary url not yet', _Files.find({url:{$exists: false}}).count());
+			if (Session.get('debug')) console.log('cloudinary url not yet', _Files.find({url:{$exists: false}}).count());
 			var files = _Files.find({url:{$exists: true}}).fetch();
-			console.log('[afCloudinary] submitting form', $('form'), 'files:', files);
+			if (Session.get('debug')) console.log('[afCloudinary] submitting form', $('form'), 'files:', files);
 			$('form').submit();
 			_.each(files, function(file){
-				console.log('[afCloudinary] removing after submit file', file);
+				if (Session.get('debug')) console.log('[afCloudinary] removing after submit file', file);
 				_Files.remove(file._id);
 			});
 		},500);
@@ -226,7 +226,6 @@ Template.afCloudinary.onRendered(function () {
 
 Template.afCloudinary.onDestroyed(function () {
 	let files = _.pluck(_Files.find({cloud: {$exists: true}}).fetch(), '_id');
-	
 	if (Session.get('debug')) console.log('destroying clouds in autoform on onDestroyed', _Files.find({cloud: {$exists: true}}).fetch());
 	_.each(files, function(_id){
 		_Files.remove({_id: _id});
@@ -332,13 +331,13 @@ Template.afCloudinary.events({
 		t.name.set(this.name);
 	},
 	'click .cancelUpload'(e,t){
-		console.log('click .cancelUpload', this);
+		if (Session.get('debug')) console.log('click .cancelUpload', this);
 		_Files.remove(this._id);
 	},
 	'click .js-remove'(e,t){
 		e.preventDefault();
 		e.stopPropagation();
-		console.log('clicked remove', this);
+		if (Session.get('debug')) console.log('clicked remove', this);
 		Meteor.call('afCloudinary.remove', {public_id: this.cloud});
 		_Files.remove(this._id);
 	},
@@ -361,7 +360,7 @@ Template.afCloudinary.events({
 		if (Session.get('debug')) console.log('changed t.atts.set', atts);
 	},
 	'submit'(e,t){
-		console.log('[afCloudinary] submit', e, this);
+		if (Session.get('debug')) console.log('[afCloudinary] submit', e, this);
 	}
 });
 

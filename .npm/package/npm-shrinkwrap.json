@@ -7,9 +7,9 @@
       "integrity": "sha1-VnmsMvaig1gh8MOtZhcZ/4WpI2s="
     },
     "blueimp-file-upload": {
-      "version": "9.21.0",
-      "resolved": "https://registry.npmjs.org/blueimp-file-upload/-/blueimp-file-upload-9.21.0.tgz",
-      "integrity": "sha512-lDsM4m6PETB0CXyKZHiSQd/HhBCCTxMwGCUnnIDG46bVsUsL/McrodXwaNZ//poUopH46XQvBdY/SnJFKK3DEg==",
+      "version": "9.28.0",
+      "resolved": "https://registry.npmjs.org/blueimp-file-upload/-/blueimp-file-upload-9.28.0.tgz",
+      "integrity": "sha512-Qvb5/CFlmIZ2cBoItpU2zQhUIvtZsSk9tV+X632uyrDpdpvdaJxDR9Wo8i7aUhfnbO1dbLuS5/auaA04Vk+XHw==",
       "dependencies": {
         "blueimp-load-image": {
           "version": "2.12.2",
@@ -19,9 +19,9 @@
       }
     },
     "blueimp-load-image": {
-      "version": "2.18.0",
-      "resolved": "https://registry.npmjs.org/blueimp-load-image/-/blueimp-load-image-2.18.0.tgz",
-      "integrity": "sha512-GUrxVE/7FpzAw/WU6GMiI3v+LpFmlAxp7sF36EQB8rGAg97ND8iTeYZ3FQbhsxS5s2dNarGKZEWhKPNKKSmMuA=="
+      "version": "2.20.1",
+      "resolved": "https://registry.npmjs.org/blueimp-load-image/-/blueimp-load-image-2.20.1.tgz",
+      "integrity": "sha512-GacvACFcxv5MV+m24ylTte2ycWMeSZqdmChAM5kSBCJOyFSY8jkQgBpGM3Mn+l1p/seGtrnRss+8QL2k+FXO4A=="
     },
     "blueimp-tmpl": {
       "version": "3.6.0",
@@ -29,34 +29,14 @@
       "integrity": "sha1-pJEJddBC4rwDunfw5i0E8VSKUkw="
     },
     "cloudinary": {
-      "version": "1.11.0",
-      "resolved": "https://registry.npmjs.org/cloudinary/-/cloudinary-1.11.0.tgz",
-      "integrity": "sha512-U5j9aWaYrSteboC7KcFZhvWy734d60CrrEUHVMpCtKhEWxpxXyVSe4Ag1BnRaVVq0YOvlJpXe6Qt6hAcb+h1lg=="
-    },
-    "cloudinary-core": {
-      "version": "2.5.0",
-      "resolved": "https://registry.npmjs.org/cloudinary-core/-/cloudinary-core-2.5.0.tgz",
-      "integrity": "sha512-lrzdLUzFZPnxpWgIAGtOwfqM2D+rG+fLsgd6KqZwDkQX+DYOUNaJpD3lEqxhoMI90zoT1gP/7+pMh/AscSaQ0w=="
-    },
-    "cloudinary-jquery-file-upload": {
-      "version": "2.5.0",
-      "resolved": "https://registry.npmjs.org/cloudinary-jquery-file-upload/-/cloudinary-jquery-file-upload-2.5.0.tgz",
-      "integrity": "sha512-UsF9gbf7effFaLG5AuVdjnk+9n+P8qWdL//eIm3tdE8E2WaSCgI4M0Xj28WEXwwsT4eH+6GIjauI6QatZVivtA=="
-    },
-    "jquery": {
-      "version": "2.2.4",
-      "resolved": "https://registry.npmjs.org/jquery/-/jquery-2.2.4.tgz",
-      "integrity": "sha1-LInWiJterFIqfuoywUUhVZxsvwI="
-    },
-    "jquery-bridget": {
-      "version": "2.0.1",
-      "resolved": "https://registry.npmjs.org/jquery-bridget/-/jquery-bridget-2.0.1.tgz",
-      "integrity": "sha1-eE0XqF5kF4DF2JrD+KfrR7C84fw="
+      "version": "1.13.2",
+      "resolved": "https://registry.npmjs.org/cloudinary/-/cloudinary-1.13.2.tgz",
+      "integrity": "sha512-mZWxWxgln6Bkk5QA72BGb1mwRBFs+r94ZzdN37gROPL7FSOslhvFfEvF/Rz/ruPqR7mblMdzVz3wuLQi1oCalw=="
     },
     "lodash": {
-      "version": "4.17.5",
-      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.5.tgz",
-      "integrity": "sha512-svL3uiZf1RwhH+cWrfZn3A4+U58wbP0tGVTLQPbjplZxZ8ROD9VLuNgsRniTlLe7OlSqR79RUehXgpBW/s0IQw=="
+      "version": "4.17.11",
+      "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.11.tgz",
+      "integrity": "sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg=="
     },
     "q": {
       "version": "1.5.1",
