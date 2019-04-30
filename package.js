@@ -1,6 +1,6 @@
 Package.describe({
 	name: 'ipstas:autoform-cloudinary3',
-	version: '1.0.12',
+	version: '1.0.13',
 	summary: 'Provides a autoform augmented field for cloudinary upload',
 	git: 'https://github.com/ipstas/autoform-cloudinary',
 	documentation: 'README.md'
@@ -24,10 +24,10 @@ Package.onUse(function (api) {
 		'ecmascript',
 		'check',
 		'mongo',
-		'templating',
-		'blaze',
+		'templating@1.3.0',
+		'blaze@2.3.0',
 		'underscore',
-		'aldeed:autoform'
+		'aldeed:autoform@6.3.0'
 	]);
 	
 	//api.mainModule('autoform_cloudinary_index.js', 'client', {lazy: true});
@@ -47,6 +47,6 @@ Package.onUse(function (api) {
 Package.onTest(function(api) {
   api.use('ecmascript');
   api.use('tinytest');
-  api.use('autoform-cloudinary3');
+  api.use('ipstas:autoform-cloudinary3');
   api.mainModule('autoform_cloudinary-tests.js');
 });
