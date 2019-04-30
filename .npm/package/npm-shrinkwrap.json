@@ -33,6 +33,11 @@
       "resolved": "https://registry.npmjs.org/cloudinary/-/cloudinary-1.13.2.tgz",
       "integrity": "sha512-mZWxWxgln6Bkk5QA72BGb1mwRBFs+r94ZzdN37gROPL7FSOslhvFfEvF/Rz/ruPqR7mblMdzVz3wuLQi1oCalw=="
     },
+    "cloudinary-jquery-file-upload": {
+      "version": "2.6.2",
+      "resolved": "https://registry.npmjs.org/cloudinary-jquery-file-upload/-/cloudinary-jquery-file-upload-2.6.2.tgz",
+      "integrity": "sha512-87zgZ9u8Aos7+bNW8fEdfh96lgbMINU0TK3a4HcSWKzboyyiBj5TaStWf1n916HsgTCXoi+7V8Ey30J7I4Oz5A=="
+    },
     "lodash": {
       "version": "4.17.11",
       "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.11.tgz",

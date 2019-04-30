@@ -260,8 +260,8 @@ Template.afCloudinary.helpers({
 		var url, upload;
 		if (!this.url)
 			return console.warn('empty url', this);
-		if (Meteor.settings.public.cloudinary && Meteor.settings.public.cloudinary.scaled)
-			upload = 'upload/' + Meteor.settings.public.cloudinary.scaled;
+		if (Meteor.settings.public.cloudinary && Meteor.settings.public.cloudinary.options.scaled)
+			upload = 'upload/' + Meteor.settings.public.cloudinary.options.scaled;
 		else
 			upload = 'upload/c_fit,h_256,fl_progressive';
 		url = this.url.replace('upload', upload );
