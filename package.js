@@ -1,6 +1,6 @@
 Package.describe({
 	name: 'ipstas:autoform-cloudinary3',
-	version: '1.0.18',
+	version: '1.0.19',
 	summary: 'Provides a autoform augmented field for cloudinary upload',
 	git: 'https://github.com/ipstas/autoform-cloudinary',
 	documentation: 'README.md'
@@ -32,9 +32,9 @@ Package.onUse(function (api) {
 	api.mainModule('autoform_cloudinary_srv.js', 'server', {lazy:false});
 
 	api.addFiles([
-		'vendor/jquery.ui.widget.js',
-		'vendor/jquery.iframe-transport.js',
-		'vendor/jquery.fileupload.js',
+		'js/vendor/jquery.ui.widget.js',
+		'js/jquery.iframe-transport.js',
+		'js/jquery.fileupload.js',
 		'autoform_cloudinary.css'
 	], 'client');
 	
