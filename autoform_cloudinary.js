@@ -1,5 +1,5 @@
 //AutoForm.debug();
-
+import { Meteor } from 'meteor/meteor';
 import * as cloudinary from 'cloudinary-jquery-file-upload';
 
 const _Files = new Mongo.Collection(null);

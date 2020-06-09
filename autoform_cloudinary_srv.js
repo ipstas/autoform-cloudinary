@@ -2,7 +2,10 @@
 //import {cloudinary} from 'cloudinary';
 var cloudinary = Npm.require('cloudinary');
 
-if (!Meteor.settings.private.cloudinary || !Meteor.settings.public.cloudinary|| !Meteor.settings.public.cloudinary.config) return console.warn('No cloudinary config is found');	
+if (!Meteor.settings) 
+	return console.warn('No settings.json is found');	
+else if (!Meteor.settings || !Meteor.settings.private.cloudinary || !Meteor.settings.public.cloudinary|| !Meteor.settings.public.cloudinary.config) 
+	return console.warn('No cloudinary config is found');	
 
 //return;
 const cloudinaryConf = Meteor.settings.public.cloudinary.config;
